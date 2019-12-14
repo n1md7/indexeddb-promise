@@ -3,8 +3,8 @@
 ![npm](https://img.shields.io/npm/v/@n1md7/indexeddb-promise)
 ![GitHub](https://img.shields.io/github/license/bichiko/indexeddb-promise)
 ## Demo
-- [Example01](https://bichiko.github.io/indexeddb-promise/dist/Example01.html)
-- [Advanced Example02](https://bichiko.github.io/indexeddb-promise/dist/Example02.html)
+- [Example01](https://bichiko.github.io/indexeddb-promise/examples/Example01.html)
+- [Advanced Example02](https://bichiko.github.io/indexeddb-promise/examples/Example02.html)
 
 ## Installation
 `npm install @n1md7/indexeddb-promise --save`
