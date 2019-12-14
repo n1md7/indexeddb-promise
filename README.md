@@ -165,3 +165,8 @@ const db = new Model(new Rooms);
 </html>
 ```
 
+```javascript
+const indexedDBModel = require('@n1md7/indexeddb-promise');
+const { ModelConfig, Model } = indexedDBModel;
+```
+
