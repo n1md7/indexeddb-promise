@@ -235,63 +235,6 @@
   // show data by default
   $( '#update' ).trigger( 'click' );
 
-  /* //bind events to save button
-   document.querySelector( '#save' )
-     .onclick = function () {
-     // insert data
-     db.insertData( {
-       "id__": id( '#id__' ).value || Math.random() * 10,
-       "roomName": id( '#name' ).value,
-       "task": true,
-       'roomId': 1
-     } )
-       .then( function () {
-         //when done click update button
-         console.info( 'Yay, you have saved the data.' );
-         id( '#update' ).click();
-       } ).catch( function ( error ) {
-       console.warn( error );
-     } );
-   };
-
-
-   id( '#update' )
-     .onclick = function () {
-     console.info( 'loading saved data....' );
-     id( '#text' ).value = '';
-     //get all data from db
-     db.selectAll()
-       .then( function ( results ) {
-         console.log( ...results );
-         // loops all record objects and append to Textarea
-         results.forEach( function ( result ) {
-           id( '#text' ).value += result.roomName + ' - ' + result.id__ + '\r\n';
-         } );
-       } );
-   };
-
-   id( '#delbtn' ).onclick = function () {
-     let $id = id( '#delId' );
-     db.deleteWhere( +$id.value ).then( function () {
-       console.log( $id.value, 'removed' );
-       id( '#update' ).click();
-     } );
-   };
-
-
-   id( '#updaterowbtn' ).onclick = function () {
-     let $id = id( '#updateid' ).value;
-     let $text = id( '#updatetext' ).value;
-
-     db.updateWhere( +$id, {
-       roomName: $text,
-       tasks: 'sadas'
-     } ).then( () => console.log( true ) )
-
-     console.log( $id, $text )
-   };*/
-
-
 </script>
 </body>
 </html>

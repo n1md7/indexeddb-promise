@@ -1,6 +1,6 @@
 {
   "name": "@n1md7/indexeddb-promise",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Indexed DB",
   "main": "index.js",
   "scripts": {
