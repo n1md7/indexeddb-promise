@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>IndexDB DEMO</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="indexeddb-promise.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <section class="m-3">
+    <h3 class="text-center text-dark"><code>IndexedDB-promise</code></h3>
+    <p class="text-center">
+      <small>Registration form <b>demo</b></small>
+    </p>
+    <div class="row justify-content-center">
+      <div class="col col-12 col-md-6 mt-sm-5">
+        <h5 class="text-center">User registration</h5>
+        <form id="sign-up">
+
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input pattern="^[\w]{2,12}$" class="form-control" placeholder="Username" id="username" name="username"
+                   autocomplete="off">
+            <small class="form-text text-muted">Enter <b>unique</b> username and have to match to
+              <code>^[\w]{4,12}$</code></small>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input pattern="^[\w]{3,16}$" class="form-control" placeholder="Password" name="password"
+                   id="password"
+                   autocomplete="off">
+            <small class="form-text text-muted">Enter strong <b>password</b> and have to match to
+              <code>^[\w]{3,16}$</code></small>
+          </div>
+          <div class="form-group">
+            <label for="re-password">Re-enter Password</label>
+            <input class="form-control" placeholder="Password" id="re-password" name="re-password"
+                   autocomplete="off">
+            <small class="form-text text-muted">
+              Enter password again to make sure you typed it correctly
+            </small>
+          </div>
+          <button type="submit" class="btn btn-primary w-100" id="save">Save</button>
+        </form>
+
+      </div>
+      <div class="col col-12 col-md-6 mt-sm-5">
+        <h5 class="text-center">Output IndexedDb data</h5>
+        <div class="row mb-2">
+          <div class="col col-12 output-area">
+            Click update
+          </div>
+        </div>
+        <button class="btn btn-dark w-100" id="update">Update</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script type="text/javascript">
+  // This is ES6 feature
+  const {
+    ModelConfig,
+    Model
+  } = indexedDBModel;
+
+  // Or with ES5
+  /*
+    const ModelConfig = indexedDBModel.ModelConfig;
+    const Model = indexedDBModel.Model;
+  */
+
+  /*
+    structure should be set once for one table
+  */
+  class UsersModel extends ModelConfig {
+    //@overrides default method
+    get config() {
+
+      return {
+        version: 1,
+        databaseName: 'MyAwesomeDb',
+        tableName: 'Users',
+        primaryKey: {
+          name: 'username',
+          autoIncrement: false,
+          unique: true
+        },
+        /* Adding default data on need */
+        initData: [
+          { username: 'nimda', password: 'nimda123' },
+          { username: 'n1md7', password: 'nimdaPass' },
+          { username: 'admin', password: 'admin123' },
+          { username: 'indexed', password: 'indexedDbuser' },
+        ],
+        structure: {
+          password: { unique: false, autoIncrement: false }
+        }
+      };
+    }
+  }
+
+  // create new instance of connector
+  const db = new Model( new UsersModel );
+
+  $( '#sign-up' ).on( 'submit', function ( event ) {
+    event.preventDefault();
+    let username = $( '#username' );
+    let password = $( '#password' );
+    let rePassword = $( '#re-password' );
+    $( username ).removeClass( 'is-invalid' );
+    $( password ).removeClass( 'is-invalid' );
+    $( rePassword ).removeClass( 'is-invalid' );
+    if ( !username.val().length ) {
+      $( username ).addClass( 'is-invalid' );
+      return false;
+    }
+    if ( !password.val().length ) {
+      $( password ).addClass( 'is-invalid' );
+      return false;
+    }
+    if ( !rePassword.val().length ) {
+      $( rePassword ).addClass( 'is-invalid' );
+      return false;
+    }
+    if ( password.val() !== rePassword.val() ) {
+      $( rePassword ).addClass( 'is-invalid' );
+      $( password ).addClass( 'is-invalid' );
+      return false;
+    }
+
+    db.insertData( {
+      username: username.val(),
+      password: password.val()
+    } )
+      .then( function ( resp ) {
+        console.log( 'Yay, data inserted in ', resp.name );
+        username.val( '' );
+        password.val( '' );
+        rePassword.val( '' );
+        $( '#update' ).trigger( 'click' );
+      } )
+      .catch( function ( errorText ) {
+        console.error( errorText );
+      } )
+  } );
+
+
+  // Get data from DB
+  $( '#update' ).click( function () {
+    const outputArea = $( '.output-area' );
+    outputArea.html( '' );
+    db.selectAll()
+      .then( function ( users ) {
+        if(!users.length){
+          outputArea.html('<p class="text-center">No data</p>');
+          return false;
+        }
+        users.forEach( function ( user, index ) {
+          const { username, password } = user;
+          outputArea.html( function () {
+            return this.innerHTML + `
+              <div class="row mb-1" data-pkey="${ username }">
+                <div class="col col-4">#<b>${ index + 1 }</b> ${ username }</div>
+                <div class="col col-4 edit-pass" contenteditable="">${ password }</div>
+                <div class="col col-2">
+                  <button class="edit-user btn btn-sm btn-warning float-right">edit</button>
+                </div>
+                <div class="col col-2">
+                  <button class="delete-user btn btn-sm btn-danger float-right">remove</button>
+                </div>
+              </div>
+            `
+          } );
+        } );
+
+        return 'HTML rendering done';
+      } )
+      .then( function () {
+        // bind click events
+        $( 'button.delete-user' ).click( function () {
+          const pKey = $( this ).closest( '.row' ).data( 'pkey' );
+          removeByPkey( pKey ).then( function ( resp ) {
+            console.info( resp );
+            // update HTML
+            $( '#update' ).trigger( 'click' );
+          } );
+        } );
+        $( 'button.edit-user' ).click( function () {
+          const row = $( this ).closest( '.row' );
+          const editPass = row.find('.edit-pass');
+          const pkey = row.data( 'pkey' );
+          if(!editPass.text().match(/^[\w]{3,16}$/)){
+            alert(`Value did not match the pattern: ^[\\w]{3,16}$`);
+            return false;
+          }
+          updateByPkey( pkey, {
+            password: editPass.text()
+          } ).then( function ( resp ) {
+            console.info( resp );
+            alert(resp);
+            // update HTML
+            $( '#update' ).trigger( 'click' );
+          } );
+        } );
+      } )
+      .catch( function ( error ) {
+        console.error( error );
+      } );
+  } );
+
+  function removeByPkey( pkey ) {
+    return new Promise( function ( resolve, reject ) {
+      db.deleteWhere( pkey ).then( function () {
+        return resolve( `${ pkey } removed from db` );
+      } ).catch( function ( errorText ) {
+        return reject( errorText );
+      } );
+    } );
+  }
+
+  function updateByPkey( pkey, data ) {
+    return new Promise( function ( resolve, reject ) {
+      db.updateWhere( pkey, data ).then( function () {
+        return resolve( `${ pkey } updated` );
+      } ).catch( function ( errorText ) {
+        return reject( errorText );
+      } );
+    } );
+  }
+
+
+
+  // show data by default
+  $( '#update' ).trigger( 'click' );
+
+  /* //bind events to save button
+   document.querySelector( '#save' )
+     .onclick = function () {
+     // insert data
+     db.insertData( {
+       "id__": id( '#id__' ).value || Math.random() * 10,
+       "roomName": id( '#name' ).value,
+       "task": true,
+       'roomId': 1
+     } )
+       .then( function () {
+         //when done click update button
+         console.info( 'Yay, you have saved the data.' );
+         id( '#update' ).click();
+       } ).catch( function ( error ) {
+       console.warn( error );
+     } );
+   };
+
+
+   id( '#update' )
+     .onclick = function () {
+     console.info( 'loading saved data....' );
+     id( '#text' ).value = '';
+     //get all data from db
+     db.selectAll()
+       .then( function ( results ) {
+         console.log( ...results );
+         // loops all record objects and append to Textarea
+         results.forEach( function ( result ) {
+           id( '#text' ).value += result.roomName + ' - ' + result.id__ + '\r\n';
+         } );
+       } );
+   };
+
+   id( '#delbtn' ).onclick = function () {
+     let $id = id( '#delId' );
+     db.deleteWhere( +$id.value ).then( function () {
+       console.log( $id.value, 'removed' );
+       id( '#update' ).click();
+     } );
+   };
+
+
+   id( '#updaterowbtn' ).onclick = function () {
+     let $id = id( '#updateid' ).value;
+     let $text = id( '#updatetext' ).value;
+
+     db.updateWhere( +$id, {
+       roomName: $text,
+       tasks: 'sadas'
+     } ).then( () => console.log( true ) )
+
+     console.log( $id, $text )
+   };*/
+
+
+</script>
+</body>
+</html>

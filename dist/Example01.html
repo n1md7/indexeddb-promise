@@ -1,0 +1,59 @@
+<html>
+<head>
+    <title>IndexedDB app</title>
+    <script src="indexeddb-promise.min.js"></script>
+</head>
+<body>
+<h1>Check the console</h1>
+<script>
+  const {
+    ModelConfig,
+    Model
+  } = indexedDBModel;
+
+  class Rooms extends ModelConfig{
+    //@overrides default method
+    get config() {
+      return {
+        version: 1,
+        databaseName: 'myNewDatabase',
+        tableName: 'myNewTable',
+        primaryKey: {
+          name: 'id',
+          autoIncrement: true,
+          unique: true
+        },
+        initData: [],
+        structure: {
+          roomId: { unique: false },
+          roomName: { unique: false },
+          comment: { unique: false }
+        }
+      };
+    }
+  }
+
+  const db = new Model(new Rooms);
+
+  // add new record
+  db.insertData({
+    'roomId': 12,
+    'roomName': 'My room name',
+    'comment': 'This room is awesome'
+  })
+    .then(function(resp){
+      //when done click update button
+      console.info('Yay, you have saved the data in ' + resp.name);
+    }).catch(function(error){
+    console.error(error);
+  });
+
+  // Get all results from DB
+  db.selectAll()
+    .then(function(results){
+      console.log(...results);
+    });
+
+</script>
+</body>
+</html>

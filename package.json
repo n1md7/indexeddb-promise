@@ -1,0 +1,16 @@
+{
+  "name": "@n1md7/indexeddb-promise",
+  "version": "1.0.5",
+  "description": "Indexed DB",
+  "main": "index.js",
+  "scripts": {
+    "minify": "browserify ./src/index.js -o ./dist/indexeddb-promise.min.js --standalone=indexedDBModel"
+  },
+  "author": "Bitchiko Kodua",
+  "license": "MIT",
+  "keywords": [
+    "db",
+    "indexed-db",
+    "promise"
+  ]
+}
