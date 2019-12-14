@@ -1,8 +1,10 @@
 # Indexed DB with promises
 
+![npm](https://img.shields.io/npm/v/@n1md7/indexeddb-promise)
+![GitHub](https://img.shields.io/github/license/bichiko/indexeddb-promise)
 ## Demo
-- [Example01](/dist/Example01.html)
-- [Advanced Example02](/dist/Example02.html)
+- [Example01](https://bichiko.github.io/indexeddb-promise/dist/Example01.html)
+- [Advanced Example02](https://bichiko.github.io/indexeddb-promise/dist/Example02.html)
 
 ### Properties
 - selectAll
