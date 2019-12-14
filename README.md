@@ -6,6 +6,9 @@
 - [Example01](https://bichiko.github.io/indexeddb-promise/dist/Example01.html)
 - [Advanced Example02](https://bichiko.github.io/indexeddb-promise/dist/Example02.html)
 
+## Installation
+`npm install @n1md7/indexeddb-promise --save`
+
 ### Properties
 - selectAll
 - selectFrom

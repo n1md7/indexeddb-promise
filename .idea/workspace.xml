@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3cf652c4-411a-450f-bcd0-9abffd49d66d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
@@ -81,7 +80,7 @@
       <option name="presentableId" value="Default" />
       <updated>1576091946090</updated>
       <workItem from="1576091947389" duration="8442000" />
-      <workItem from="1576320579215" duration="14964000" />
+      <workItem from="1576320579215" duration="15652000" />
     </task>
     <servers />
   </component>
