@@ -7,7 +7,27 @@
 - [Advanced Example02](https://bichiko.github.io/indexeddb-promise/examples/Example02.html)
 
 ## Installation
-`npm install @n1md7/indexeddb-promise --save`
+```shell script
+npm install @n1md7/indexeddb-promise --save
+```
+or
+
+```shell script
+yarn add @n1md7/indexeddb-promise
+```
+or
+```shell script
+<script src="https://bundle.run/@n1md7/indexeddb-promise@1.1.3"></script>
+```
+or
+```shell script
+<script src="https://unpkg.com/@n1md7/indexeddb-promise@1.1.3/src/index.js"></script>
+```
+or
+```shell script
+<script src="https://cdn.jsdelivr.net/npm/@n1md7/indexeddb-promise@1.1.3/dist/indexeddb.min.js"></script>
+```
+
 
 ### Properties
 - selectAll
