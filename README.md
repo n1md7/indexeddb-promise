@@ -1,5 +1,8 @@
-![npm](https://img.shields.io/npm/v/@n1md7/indexeddb-promise)
+[![npm version](https://badge.fury.io/js/@n1md7%2Findexeddb-promise.svg)](https://badge.fury.io/js/@n1md7%2Findexeddb-promise)
+[![Node.js Package](https://github.com/n1md7/indexeddb-promise/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/n1md7/indexeddb-promise/actions/workflows/npm-publish.yml)
+[![Node.js CI - tests](https://github.com/n1md7/indexeddb-promise/actions/workflows/node.js.yml/badge.svg)](https://github.com/n1md7/indexeddb-promise/actions/workflows/node.js.yml)
 ![GitHub](https://img.shields.io/github/license/n1md7/indexeddb-promise)
+[![codecov](https://codecov.io/gh/n1md7/indexeddb-promise/branch/master/graph/badge.svg?token=Q5OJ22Q3LK)](https://codecov.io/gh/n1md7/indexeddb-promise)
 
 # Indexed DB wrapper with promises
 
