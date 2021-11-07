@@ -1,14 +1,14 @@
 <html>
   <head>
     <title>IndexedDB app</title>
-    <script src="../dist/indexeddb.min.js"></script>
+    <script src="../dist/indexed-db.min.js"></script>
   </head>
   <body>
     <h1>Check the console</h1>
     <script>
-      const { Model } = indexedDBModel;
+      const { Model } = IndexedDB;
 
-      class DB extends indexedDBModel.Model {
+      class DB extends IndexedDB.Model {
         //@overrides default method
         get config() {
           return {
@@ -33,7 +33,7 @@
       const db = new DB();
 
       // add new record
-      db.insertData({
+      db.insert({
         roomId: 12,
         roomName: 'My room name',
         comment: 'This room is awesome',

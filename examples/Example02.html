@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="../dist/indexeddb.min.js"></script>
+    <script src="../dist/indexed-db.min.js"></script>
   </head>
   <body>
     <div class="container-fluid">
@@ -73,7 +73,7 @@
     </div>
     <script type="text/javascript">
       // This is ES6 feature
-      const { Model } = indexedDBModel;
+      const { Model } = IndexedDB;
 
       /*  class My extends MM{
     get config() {
@@ -113,7 +113,7 @@
       /*
     structure should be set once for one table
   */
-      class DB extends indexedDBModel.Model {
+      class DB extends IndexedDB.Model {
         //@overrides default method
         get config() {
           return {
@@ -169,7 +169,7 @@
           return false;
         }
 
-        db.insertData({
+        db.insert({
           username: username.val(),
           password: password.val(),
         })
@@ -253,7 +253,7 @@
 
       function removeByPkey(pkey) {
         return new Promise(function (resolve, reject) {
-          db.deleteWhere(String(pkey))
+          db.deleteByPk(String(pkey))
             .then(function () {
               return resolve(`${pkey} removed from db`);
             })
@@ -265,7 +265,7 @@
 
       function updateByPkey(pkey, data) {
         return new Promise(function (resolve, reject) {
-          db.updateWhere(String(pkey), data)
+          db.updateByPk(String(pkey), data)
             .then(function () {
               return resolve(`${pkey} updated`);
             })

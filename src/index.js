@@ -8,6 +8,7 @@ const arraySorter = require('./array-sorter');
  *   primaryKey: {
  *     name: string,
  *     autoIncrement: boolean,
+ *     unique: boolean,
  *   },
  *   initData?: Array<{
  *     [key: string]: any,
@@ -95,7 +96,7 @@ class Model {
     return {
       version: 1,
       databaseName: 'DefaultDatabase',
-      tableName: 'roomTableView',
+      tableName: 'DefaultTable',
       primaryKey: {
         name: 'id',
         autoIncrement: true,
@@ -136,7 +137,7 @@ class Model {
    * @param {{[key: string]: any}} data
    * @returns {Promise<any>}
    */
-  insertData(data) {
+  insert(data) {
     const verifiedInsertData = this.verify(data);
 
     return new Promise((resolve, reject) => {
@@ -147,7 +148,7 @@ class Model {
           .add(verifiedInsertData);
 
         request.onsuccess = function () {
-          return resolve(db);
+          return resolve(data, db);
         };
 
         request.onerror = function () {
@@ -158,11 +159,11 @@ class Model {
   }
 
   /**
-   * @description This method is used to select data from the table.
+   * @description This method is used to select data from the table by Primary key.
    * @param {string} pKey
-   * @returns {Promise<any>}
+   * @returns {Promise<ListItem|null>}
    */
-  selectFrom(pKey) {
+  selectByPk(pKey) {
     return new Promise((resolve, reject) => {
       this.fingersCrossed.then((db) => {
         const transaction = db.transaction([this.tableName]);
@@ -174,14 +175,17 @@ class Model {
         request.onsuccess = function () {
           if (request.result) {
             return resolve(request.result);
-          } else {
-            return reject('No result found');
           }
+          resolve(null);
         };
       });
     });
   }
 
+  /**
+   * @description This method is used to select all the data from the table.
+   * @returns {Promise<ListItem[]>}
+   */
   selectAll() {
     return new Promise((resolve, reject) => {
       this.fingersCrossed.then((db) => {
@@ -203,15 +207,17 @@ class Model {
 
   /**
    * @description This method is used to select data from the table.
-   * @param {{
-   *   where: function({}),
+   * @param  {{
+   *   where?: {
+   *     [key: string]: any
+   *   } | function(ListItem[]):ListItem[],
    *   limit?: number,
    *   orderByDESC?: boolean,
    *   sortBy?: string | string[]
    * }} options
-   * @returns {Promise<any>}
+   * @returns {Promise<ListItem[]>}
    */
-  selectWhere(options) {
+  select(options) {
     const props = new Proxy(options, {
       get: function (target, name) {
         return name in target ? target[name] : false;
@@ -226,8 +232,18 @@ class Model {
         if (dataBucket.length === 0) return [];
 
         if (typeof props.where === 'function') {
-          // exec callback fn and return
           result.val = props.where.call(dataBucket, dataBucket);
+        } else {
+          const whereKeys = Object.keys(props.where);
+          result.val = dataBucket.filter((item) => {
+            const dataKeys = Object.keys(item);
+            for (const key of whereKeys) {
+              if (dataKeys.includes(key) && item[key] === props.where[key]) {
+                return true;
+              }
+            }
+            return false;
+          });
         }
       }
 
@@ -254,10 +270,10 @@ class Model {
    * @param {{[key: string]: any}} dataToUpdate
    * @returns {Promise<any>}
    */
-  updateWhere(pKey, dataToUpdate) {
+  updateByPk(pKey, dataToUpdate) {
     return new Promise((resolve, reject) => {
       this.fingersCrossed.then((db) => {
-        this.selectFrom(pKey).then((fetchedData) => {
+        this.selectByPk(pKey).then((fetchedData) => {
           const transaction = db.transaction([this.tableName], 'readwrite');
           const store = transaction.objectStore(this.tableName);
           const data = Object.assign(fetchedData, dataToUpdate);
@@ -278,7 +294,7 @@ class Model {
    * @param {string} pKey
    * @returns {Promise<unknown>}
    */
-  deleteWhere(pKey) {
+  deleteByPk(pKey) {
     return new Promise((resolve, reject) => {
       this.fingersCrossed.then((db) => {
         const request = db.transaction([this.tableName], 'readwrite').objectStore(this.tableName).delete(pKey);
@@ -293,6 +309,4 @@ class Model {
   }
 }
 
-module.exports = {
-  Model,
-};
+module.exports = { Model };

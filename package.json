@@ -4,8 +4,8 @@
   "description": "Indexed DB",
   "main": "./src/index.js",
   "scripts": {
-    "minify": "browserify ./src/index.js -o ./dist/indexeddb.min.js --standalone=indexedDBModel",
-    "format": "npx prettier --check .",
+    "minify": "browserify ./src/index.js -o ./dist/indexed-db.min.js --standalone=IndexedDB -t [ babelify --presets [ @babel/preset-env ] ]",
+    "format": "npx prettier --write --ignore-unknown './(src|tests)/*'",
     "prepare": "husky install"
   },
   "author": "Harry Kodua",
@@ -30,12 +30,32 @@
   },
   "homepage": "https://github.com/n1md7/indexeddb-promise#readme",
   "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.0",
+    "@jest/globals": "^27.3.1",
+    "babel-jest": "^27.3.1",
+    "babelify": "^10.0.0",
     "browserify": "^17.0.0",
+    "fake-indexeddb": "^3.1.7",
     "husky": "^7.0.4",
+    "jest": "^27.3.1",
+    "jest-junit": "^13.0.0",
     "lint-staged": "^11.2.6",
     "prettier": "2.4.1"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
