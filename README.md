@@ -85,10 +85,12 @@ where: (data) => data.filter((item) => item.username === 'admin');
 or it can be an object, which gets data with AND(&&) comparison
 
 ```javascript
-where: {
-  username: 'admin',
-  password:'admin123'
-}
+props = {
+  where: {
+    username: 'admin',
+    password: 'admin123',
+  },
+};
 ```
 
 ### .updateByPk(pKey, {...}): Promise
@@ -96,7 +98,7 @@ where: {
 Has two parameters `pkey` and `keyValue` pair of updated data
 
 ```javascript
-.updateByPk(123, { username: 'admin' })
+updateByPk(123, { username: 'admin' });
 ```
 
 ### .deleteByPk(pKey): Promise
