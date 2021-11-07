@@ -1,11 +1,15 @@
 const IndexedDB = require('../src');
-const { describe, it, expect, beforeEach } = require('@jest/globals');
+const { describe, it, expect, beforeEach, jest } = require('@jest/globals');
 
 describe('IndexedDB', () => {
   const ref = { i: 1 };
   beforeAll(() => jest.clearAllMocks());
   beforeEach(() => {
     ref.i++;
+    jest.clearAllMocks();
+  });
+  afterEach(() => {
+    jest.clearAllTimers();
   });
 
   it('should be defined', () => {
@@ -287,5 +291,141 @@ describe('IndexedDB', () => {
     const deleted = await db.deleteByPk('admin');
     expect(deleted).toEqual('admin');
     expect(await db.selectByPk('admin')).toBeNull();
+  });
+
+  it('should throw not a valid key', () => {
+    class DB extends IndexedDB.Model {
+      get config() {
+        return {
+          version: 1,
+          databaseName: `Test-db-0${ref.i}`,
+          tableName: 'users',
+          primaryKey: {
+            name: 'username',
+            autoIncrement: false,
+            unique: true,
+          },
+          initData: [
+            { username: 'n1md7', password: 'passwd' },
+            { username: 'admin', password: 'admin123' },
+          ],
+          structure: {
+            username: { unique: true, multiEntry: false },
+            password: { unique: false, multiEntry: false },
+          },
+        };
+      }
+    }
+    expect(() => {
+      new DB().insert({ name: 'n1md7', password: 'passwd' });
+    }).toThrow('is not a valid key. Not defined in configuration [structure].');
+  });
+
+  it('should verify config', () => {
+    const config = {
+      version: 1,
+      databaseName: `Test-db-0${ref.i}`,
+      tableName: 'users',
+      primaryKey: {
+        name: 'username',
+        autoIncrement: false,
+        unique: true,
+      },
+      initData: [
+        { username: 'n1md7', password: 'passwd' },
+        { username: 'admin', password: 'admin123' },
+      ],
+      structure: {
+        username: { unique: true, multiEntry: false },
+        password: { unique: false, multiEntry: false },
+      },
+    };
+    class DB extends IndexedDB.Model {
+      get config() {
+        return config;
+      }
+    }
+
+    const db = new DB();
+    expect(db.config).toEqual(config);
+  });
+
+  it('should throw Either include primary key as well or set {autoincrement: true}.', () => {
+    class DB extends IndexedDB.Model {
+      get config() {
+        return {
+          version: 1,
+          databaseName: `Test-db-0${ref.i}`,
+          tableName: 'users',
+          primaryKey: {
+            name: 'username',
+            autoIncrement: false,
+            unique: false,
+          },
+          initData: [
+            { username: 'n1md7', password: 'passwd' },
+            { username: 'admin', password: 'admin123' },
+          ],
+          structure: {
+            username: { unique: true, multiEntry: false },
+            password: { unique: false, multiEntry: false },
+          },
+        };
+      }
+    }
+
+    expect(() => {
+      new DB().insert({ password: 'passwd' });
+    }).toThrow('Either include primary key as well or set {autoincrement: true}.');
+  });
+
+  it('should throw Unsupported environment', () => {
+    jest.spyOn(window.indexedDB, 'open').mockImplementation(() => {
+      throw new Error('Unsupported environment');
+    });
+
+    class DB extends IndexedDB.Model {
+      get config() {
+        return {
+          version: 1,
+          databaseName: `Test-db-0${ref.i}`,
+          tableName: 'users',
+          primaryKey: {
+            name: 'username',
+            autoIncrement: false,
+            unique: true,
+          },
+          initData: [
+            { username: 'n1md7', password: 'passwd' },
+            { username: 'admin', password: 'admin123' },
+          ],
+          structure: {
+            username: { unique: true, multiEntry: false },
+            password: { unique: false, multiEntry: false },
+          },
+        };
+      }
+    }
+
+    new DB().fingersCrossed.catch((err) => {
+      expect(err).toBeInstanceOf(Error);
+      expect(err.message).toBe('Unsupported environment');
+    });
+  });
+
+  it('should throw Config has to be an Object', () => {
+    jest.spyOn(window.indexedDB, 'open').mockImplementation(() => {
+      throw new Error('Unsupported environment');
+    });
+
+    class DB extends IndexedDB.Model {
+      get config() {
+        return [];
+      }
+    }
+
+    expect(() => {
+      new DB();
+    }).toThrow('Config has to be an Object');
   });
 });

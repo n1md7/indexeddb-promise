@@ -1,7 +1,7 @@
-# Indexed DB with promises
-
 ![npm](https://img.shields.io/npm/v/@n1md7/indexeddb-promise)
 ![GitHub](https://img.shields.io/github/license/n1md7/indexeddb-promise)
+
+# Indexed DB wrapper with promises
 
 ## Demo
 
@@ -19,32 +19,50 @@ yarn add @n1md7/indexeddb-promise
 or
 
 ```shell script
-<script src="https://bundle.run/@n1md7/indexeddb-promise@1.1.3"></script>
-<script src="https://unpkg.com/@n1md7/indexeddb-promise@1.1.3/src/index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@n1md7/indexeddb-promise@1.1.3/dist/indexeddb.min.js"></script>
+<script src="https://bundle.run/@n1md7/indexeddb-promise@2.0.0"></script>
+<script src="https://unpkg.com/@n1md7/indexeddb-promise@2.0.0/src/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@n1md7/indexeddb-promise@2.0.0/dist/indexed-db.min.js"></script>
 ```
 
-### Properties
+### Available methods
 
+- select
+- insert
 - selectAll
-- selectFrom
-- selectWhere
+- selectByPk
 - updateByPk
 - deleteByPk
 
-### .selectAll()
+### .selectAll(): Promise
 
 Gets all the data from db and returns promise with response data
 
-### .selectFrom(pKey)
+### .selectByPk(pKey: string): Promise
 
 Has one parameter `pkey` as primaryKey and returns promise with data
 
-### .selectWhere({...})
+### .select({...}): Promise
 
 Has one parameter `props` which can be
 
 ```javascript
+/**
+ * @typedef {string | number | boolean | null | undefined} Item
+ */
+/**
+ * @typedef {{[key: string]: Item} | Item} ListItem
+ */
+/**
+ * @param  {{
+ *   where?: {
+ *     [key: string]: any
+ *   } | function(ListItem[]):ListItem[],
+ *   limit?: number,
+ *   orderByDESC?: boolean,
+ *   sortBy?: string | string[]
+ * }} options
+ * @returns {Promise<ListItem[]>}
+ */
 props = {
   limit: 10,
   where: (dataArray) => {
@@ -55,15 +73,30 @@ props = {
 };
 ```
 
-@where property can filter out data
-like `where: data => data.filter(dt.username === 'admin')`
+@where property can filter out data like
 
-### .updateByPk(pKey, {...})
+```javascript
+where: (data) => data.filter((item) => item.username === 'admin');
+```
+
+or it can be an object, which gets data with AND(&&) comparison
+
+```javascript
+where: {
+  username: 'admin',
+  password:'admin123'
+}
+```
+
+### .updateByPk(pKey, {...}): Promise
 
 Has two parameters `pkey` and `keyValue` pair of updated data
-`.updateByPk(123, {username: 'admin'})`
 
-### .deleteByPk(pKey)
+```javascript
+.updateByPk(123, { username: 'admin' })
+```
+
+### .deleteByPk(pKey): Promise
 
 Has one parameter `pKey` which record to delete based on primary key
 
@@ -75,7 +108,7 @@ _note_ primary key is type sensitive. If it is saved as integer then should pass
 <html>
   <head>
     <title>IndexedDB app</title>
-    <script src="./dist/indexeddb-promise.min.js"></script>
+    <script src="./dist/indexed-db.min.js"></script>
   </head>
   <body>
     <script>
@@ -85,21 +118,20 @@ _note_ primary key is type sensitive. If it is saved as integer then should pass
 </html>
 ```
 
-Once you add _indexeddb-promise.min.js_ in your document then you will be able to access
-`indexedDBModel` variable globally which contains `Model` and `ModelConfig`.
-They can be extracted as following
+Once you add _indexed-db.min.js_ in your document then you will be able to access
+`IndexedDBModel` variable globally which contains `Model`. They can be extracted as following
 
 ```javascript
-const { Model } = indexedDBModel;
+const { Model } = IndexedDBModel;
 
 // or
-const Model = indexedDBModel.Model;
+const Model = IndexedDBModel.Model;
 ```
 
 ### Create example config
 
 ```javascript
-class DB extends Model {
+class DB extends IndexedDBModel.Model {
   //@overrides default method
   get config() {
     return {
@@ -109,12 +141,14 @@ class DB extends Model {
       primaryKey: {
         name: 'id',
         autoIncrement: false,
+        unique: true,
       },
       initData: [],
       structure: {
-        roomId: { unique: false, autoIncrement: true },
-        roomName: { unique: false, autoIncrement: false },
-        comments: { unique: false, autoIncrement: false },
+        username: { unique: false, autoIncrement: false },
+        password: { unique: false, autoIncrement: false },
+        createdAt: { unique: false, autoIncrement: false },
+        updatedAt: { unique: false, autoIncrement: false },
       },
     };
   }
@@ -133,13 +167,11 @@ const db = new DB();
 <html>
   <head>
     <title>IndexedDB app</title>
-    <script src="indexeddb-promise.min.js"></script>
+    <script src="./dist/indexed-db.min.js"></script>
   </head>
   <body>
     <script>
-      const { Model } = indexedDBModel;
-
-      class DB extends Model {
+      class DB extends IndexedDBModel.Model {
         //@overrides default method
         get config() {
           return {
@@ -149,12 +181,14 @@ const db = new DB();
             primaryKey: {
               name: 'id',
               autoIncrement: false,
+              unique: true,
             },
             initData: [],
             structure: {
-              roomId: { unique: false, autoIncrement: true },
-              roomName: { unique: false, autoIncrement: false },
-              comment: { unique: false, autoIncrement: false },
+              username: { unique: false, autoIncrement: false },
+              password: { unique: false, autoIncrement: false },
+              createdAt: { unique: false, autoIncrement: false },
+              updatedAt: { unique: false, autoIncrement: false },
             },
           };
         }
@@ -162,22 +196,22 @@ const db = new DB();
 
       const db = new DB();
 
-      // add new record
+      // add a new record
       db.insert({
         id: Math.random() * 10,
-        roomName: 'My room name',
-        roomId: 1,
-        comment: 'This room is awesome',
+        username: 'admin',
+        password: 'nimda',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       })
         .then(function () {
-          //when done click update button
           console.info('Yay, you have saved the data.');
         })
         .catch(function (error) {
           console.error(error);
         });
 
-      // Get all results from DB
+      // Get all results from the database
       db.selectAll().then(function (results) {
         console.log(...results);
       });
@@ -187,6 +221,8 @@ const db = new DB();
 ```
 
 ```javascript
-const indexedDBModel = require('@n1md7/indexeddb-promise');
-const { Model } = indexedDBModel;
+const IndexedDBModel = require('@n1md7/indexeddb-promise');
+const { Model } = IndexedDBModel;
+// or
+import { Model } from '@n1md7/indexeddb-promise';
 ```

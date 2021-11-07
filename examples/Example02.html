@@ -75,44 +75,6 @@
       // This is ES6 feature
       const { Model } = IndexedDB;
 
-      /*  class My extends MM{
-    get config() {
-      return {
-        version: 1,
-        databaseName: 'mm-database',
-        tableName: 'mm-table',
-        primaryKey: {
-          name: 'id',
-          autoIncrement: true
-        },
-        initData: [{
-          name: 'Dude',
-          age: 25
-        }],
-        structure: {
-          name: {unique: false, multiEntry: false},
-          age: {unique: false, multiEntry: false},
-        }
-      }
-    }
-  }
-  
-  const myDb = new My();
-  myDb.selectAll().then(res => {
-    console.log(res);
-  }).catch(err => {
-    console.log(err);
-  });*/
-
-      // Or with ES5
-      /*
-    const ModelConfig = indexedDBModel.ModelConfig;
-    const Model = indexedDBModel.Model;
-  */
-
-      /*
-    structure should be set once for one table
-  */
       class DB extends IndexedDB.Model {
         //@overrides default method
         get config() {
@@ -125,7 +87,6 @@
               autoIncrement: false,
               unique: true,
             },
-            /* Adding default data on need */
             initData: [
               { username: 'hey', password: 'hmm' },
               { username: 'n1md7', password: 'nimdaPass' },

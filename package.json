@@ -1,7 +1,7 @@
 {
   "name": "@n1md7/indexeddb-promise",
   "version": "2.0.0",
-  "description": "Indexed DB",
+  "description": "Indexed DB wrapper with promises",
   "main": "./src/index.js",
   "scripts": {
     "minify": "browserify ./src/index.js -o ./dist/indexed-db.min.js --standalone=IndexedDB -t [ babelify --presets [ @babel/preset-env ] ]",
@@ -40,6 +40,7 @@
     "husky": "^7.0.4",
     "jest": "^27.3.1",
     "jest-junit": "^13.0.0",
+    "jsdom": "^16.7.0",
     "lint-staged": "^11.2.6",
     "prettier": "2.4.1"
   },

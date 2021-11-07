@@ -13,12 +13,12 @@ const arraySorter = require('./array-sorter');
  *   initData?: Array<{
  *     [key: string]: any,
  *   }>,
- *   structure: Array<{
+ *   structure: {
  *      [key: string]: {
  *        unique?: boolean,
  *        multiEntry?: boolean,
  *      },
- *   }>
+ *   }
  * }} Config
  */
 
@@ -26,13 +26,13 @@ class Model {
   constructor() {
     this.tableName = this.config.tableName || 'table';
 
-    this.fingersCrossed = new Promise((resolve, reject) => {
-      if (!window || !('indexedDB' in window)) {
-        return reject('Unsupported environment');
-      }
+    if (Array.isArray(this.config)) {
+      throw new Error('Config has to be an Object');
+    }
 
-      if (Array.isArray(this.config)) {
-        return reject('Config has to be an Object');
+    this.fingersCrossed = new Promise((resolve, reject) => {
+      if (!window || !('indexedDB' in window) || !('open' in window.indexedDB)) {
+        return reject('Unsupported environment');
       }
 
       const version = this.config.version || 1;
