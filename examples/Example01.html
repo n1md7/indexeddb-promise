@@ -1,59 +1,55 @@
 <html>
-<head>
+  <head>
     <title>IndexedDB app</title>
     <script src="../dist/indexeddb.min.js"></script>
-</head>
-<body>
-<h1>Check the console</h1>
-<script>
-  const {
-    ModelConfig,
-    Model
-  } = indexedDBModel;
+  </head>
+  <body>
+    <h1>Check the console</h1>
+    <script>
+      const { Model } = indexedDBModel;
 
-  class Rooms extends ModelConfig{
-    //@overrides default method
-    get config() {
-      return {
-        version: 1,
-        databaseName: 'myNewDatabase',
-        tableName: 'myNewTable',
-        primaryKey: {
-          name: 'id',
-          autoIncrement: true,
-          unique: true
-        },
-        initData: [],
-        structure: {
-          roomId: { unique: false },
-          roomName: { unique: false },
-          comment: { unique: false }
+      class DB extends indexedDBModel.Model {
+        //@overrides default method
+        get config() {
+          return {
+            version: 1,
+            databaseName: 'boo',
+            tableName: 'myNewTable',
+            primaryKey: {
+              name: 'id',
+              autoIncrement: true,
+              unique: true,
+            },
+            initData: [],
+            structure: {
+              roomId: { unique: false },
+              roomName: { unique: false },
+              comment: { unique: false },
+            },
+          };
         }
-      };
-    }
-  }
+      }
 
-  const db = new Model(new Rooms);
+      const db = new DB();
 
-  // add new record
-  db.insertData({
-    'roomId': 12,
-    'roomName': 'My room name',
-    'comment': 'This room is awesome'
-  })
-    .then(function(resp){
-      //when done click update button
-      console.info('Yay, you have saved the data in ' + resp.name);
-    }).catch(function(error){
-    console.error(error);
-  });
+      // add new record
+      db.insertData({
+        roomId: 12,
+        roomName: 'My room name',
+        comment: 'This room is awesome',
+      })
+        .then(function (resp) {
+          //when done click update button
+          console.info('Yay, you have saved the data in ' + resp.name);
+        })
+        .catch(function (error) {
+          console.error(error);
+        });
 
-  // Get all results from DB
-  db.selectAll()
-    .then(function(results){
-      console.log(...results);
-    });
-
-</script>
-</body>
+      // Get all results from DB
+      db.selectAll().then(function (results) {
+        console.log(...results);
+      });
+    </script>
+  </body>
 </html>

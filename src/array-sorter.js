@@ -1,52 +1,78 @@
-const arraySorter = function(list) {
-    this.sortBy = function (props) {
-        /*props = {
-            desc: true,
-            keys: ['comments', 'cr_date']
-        }*/
-        let sorted = [];
-        if ('keys' in props) {
-            if (!(props.keys instanceof Array)) {
-                props.keys = [props.keys];
-            }
+/**
+ * @typedef {{[key: string]: string | number | boolean | null | undefined}} ListItem
+ */
 
-            props.keys.forEach(key => {
-                if (sorted.length === 0) {
-                    sorted = list;
+/**
+ * @description Array sorter
+ * @param {ListItem[]} listToBeSorted
+ */
+const arraySorter = function (listToBeSorted) {
+  /**
+   * @description Sorts array by key property
+   * @param {{
+   *   keys: string | string[],
+   *   desc?: boolean,
+   * }} props
+   * @returns {*[]}
+   */
+  this.sortBy = (props) => {
+    /** @type {{sorted: ListItem[]}} */
+    const ref = { sorted: listToBeSorted };
+    if (props.hasOwnProperty('keys')) {
+      if (!Array.isArray(props.keys)) {
+        /** @type {string[]} */
+        props.keys = [props.keys];
+      }
+
+      props.keys.forEach(
+        /** @param {string} key */
+        (key) => {
+          ref.sorted = ref.sorted.sort(
+            /**
+             * @param {ListItem} next
+             * @param {ListItem} current
+             * @returns {number}
+             */
+            function (next, current) {
+              // Sorting by number key
+              if (!isNaN(current[key]) && !isNaN(next[key])) {
+                return next[key] - current[key];
+              }
+
+              // Sorting by date key
+              if (!isNaN(new Date(current[key]).valueOf())) {
+                const $current = new Date(current[key]).valueOf();
+                const $next = { val: new Date(0).valueOf() };
+                if (!isNaN(new Date(next[key]).valueOf())) {
+                  $next.val = new Date(next[key]).valueOf();
                 }
-                sorted = sorted.sort(function (next, current) {
-                    if (!isNaN(current[key]) && !isNaN(next[key])) {
-                        //number sorting
-                        return next[key] - current[key];
-                    }
 
-                    if (!isNaN(new Date(current[key]).getDate())) {
-                        //date sorting
-                        let $current = new Date(current[key]);
-                        let $next = new Date(0);
-                        if (!isNaN(new Date(next[key]).getDate())) {
-                            $next = new Date(next[key]);
-                        }
+                if ($current > $next.val) return -1;
+                if ($current < $next.val) return 1;
+                return 0;
+              }
 
-                        if ($current > $next) return -1;
-                        if ($current < $next) return 1;
-                        return 0;
-                    }
+              // Alphabetical sorting
+              if (current[key].toLowerCase() > next[key].toLowerCase()) return -1;
+              if (current[key].toLowerCase() < next[key].toLowerCase()) return 1;
+              return 0;
+            },
+          );
+        },
+      );
 
-                    //alphabetical sorting
-                    if (current[key].toLowerCase() > next[key].toLowerCase()) return -1;
-                    if (current[key].toLowerCase() < next[key].toLowerCase()) return 1;
-                    return 0;
-                });
-            });
+      if (props.hasOwnProperty('desc') && props.desc) {
+        ref.sorted = ref.sorted.reverse();
+      }
+    }
 
-            if ('desc' in props && props.desc) {
-                sorted = sorted.reverse();
-            }
-        }
-
-        return sorted;
-    };
+    return ref.sorted;
+  };
 };
 
-module.exports = list => new arraySorter(list);
+/**
+ * @description Singleton pattern for Array sorter
+ * @param {ListItem[]} list
+ * @returns {arraySorter}
+ */
+module.exports = (list) => new arraySorter(list);
