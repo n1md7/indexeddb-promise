@@ -6,6 +6,7 @@
   "scripts": {
     "minify": "browserify ./src/index.js -o ./dist/indexed-db.min.js --standalone=IndexedDB -t [ babelify --presets [ @babel/preset-env ] ]",
     "format": "npx prettier --write --ignore-unknown './(src|tests)/*'",
+    "test": "npx jest --coverage --ci",
     "prepare": "husky install"
   },
   "author": "Harry Kodua",
