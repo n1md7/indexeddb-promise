@@ -5,7 +5,7 @@
   "main": "./src/index.js",
   "scripts": {
     "minify": "browserify ./src/index.js -o ./dist/indexed-db.min.js --standalone=IndexedDB -t [ babelify --presets [ @babel/preset-env ] ]",
-    "format": "npx prettier --write --ignore-unknown './(src|tests)/*'",
+    "format": "npx prettier --write --ignore-unknown './(src|tests)/**/*.js'",
     "test": "npx jest --coverage --ci",
     "prepare": "husky install",
     "serve": "npx http-server -o /examples ."
