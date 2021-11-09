@@ -9,11 +9,11 @@
     <script src="../dist/indexed-db.min.js"></script>
   </head>
   <body>
-    <div class="container-fluid">
+    <div class="container">
       <section class="my-3">
         <h3 class="text-center text-dark"><code>IndexedDB-promise</code></h3>
         <p class="text-center">
-          <small>Registration form <b>demo</b></small>
+          <small>Registration form <strong>demo</strong></small>
         </p>
         <div class="row justify-content-center">
           <div class="col col-12 col-md-6 mt-sm-5">
@@ -30,7 +30,7 @@
                   autocomplete="off"
                 />
                 <small class="form-text text-muted"
-                  >Enter <b>unique</b> username and have to match to <code>^[\w]{4,12}$</code></small
+                  >Enter <strong>unique</strong> username and have to match to <code>^[\w]{4,12}$</code></small
                 >
               </div>
               <div class="form-group">
@@ -44,7 +44,7 @@
                   autocomplete="off"
                 />
                 <small class="form-text text-muted"
-                  >Enter strong <b>password</b> and have to match to <code>^[\w]{3,16}$</code></small
+                  >Enter strong <strong>password</strong> and have to match to <code>^[\w]{3,16}$</code></small
                 >
               </div>
               <div class="form-group">
@@ -61,6 +61,7 @@
               <button type="submit" class="btn btn-primary w-100" id="save">Save</button>
             </form>
           </div>
+          <div class="col-12"></div>
           <div class="col col-12 col-md-6 mt-sm-5">
             <h5 class="text-center">Output IndexedDb data</h5>
             <div class="row mb-2">
@@ -79,7 +80,7 @@
         //@overrides default method
         get config() {
           return {
-            version: 4,
+            version: 11,
             databaseName: 'Boo',
             tableName: 'Users',
             primaryKey: {
@@ -88,14 +89,24 @@
               unique: true,
             },
             initData: [
-              { username: 'hey', password: 'hmm' },
+              { username: 'James', password: 'james123', something: 'Some text' },
+              { username: 'CokeZero', password: 'zero123', something: 'Some text' },
               { username: 'n1md7', password: 'nimdaPass' },
-              { username: 'admin', password: 'admin123' },
-              { username: 'indexed', password: 'indexedDbuser' },
+              { username: 'n1md7@', password: 'nimdaPass' },
+              {
+                username: 'admin',
+                password: 'admin123',
+                my: 'user',
+                is: 'admin',
+                the: 'admin',
+                admin: 'admin',
+                admin123: 'admin123',
+              },
+              { username: 'indexed', password: 'indexedDbUser' },
             ],
-            structure: {
+            indexes: {
               username: { unique: true, multiEntry: false },
-              password: { unique: false, multiEntry: false },
+              something: { unique: false, multiEntry: false },
             },
           };
         }
@@ -135,7 +146,7 @@
           password: password.val(),
         })
           .then(function (resp) {
-            console.log('Yay, data inserted in ', resp.name);
+            console.log('Yay, data inserted in ', data, resp.name);
             username.val('');
             password.val('');
             rePassword.val('');
@@ -162,14 +173,14 @@
                 return (
                   this.innerHTML +
                   `
-              <div class="row mb-1" data-pkey="${username}">
-                <div class="col col-4">#<b>${index + 1}</b> ${username}</div>
-                <div class="col col-4 edit-pass" contenteditable="">${password}</div>
-                <div class="col col-2">
-                  <button class="edit-user btn btn-sm btn-warning float-right">edit</button>
+              <div class='row mb-1' data-pkey='${username}'>
+                <div class='col col-4'>#<b>${index + 1}</b> ${username}</div>
+                <div class='col col-4 edit-pass' contenteditable=''>${password}</div>
+                <div class='col col-2'>
+                  <button class='edit-user btn btn-sm btn-warning float-right'>edit</button>
                 </div>
-                <div class="col col-2">
-                  <button class="delete-user btn btn-sm btn-danger float-right">remove</button>
+                <div class='col col-2'>
+                  <button class='delete-user btn btn-sm btn-danger float-right'>remove</button>
                 </div>
               </div>
             `

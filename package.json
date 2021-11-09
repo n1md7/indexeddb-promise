@@ -7,7 +7,8 @@
     "minify": "browserify ./src/index.js -o ./dist/indexed-db.min.js --standalone=IndexedDB -t [ babelify --presets [ @babel/preset-env ] ]",
     "format": "npx prettier --write --ignore-unknown './(src|tests)/*'",
     "test": "npx jest --coverage --ci",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "serve": "npx http-server -o /examples ."
   },
   "author": "Harry Kodua",
   "license": "MIT",
@@ -38,6 +39,7 @@
     "babelify": "^10.0.0",
     "browserify": "^17.0.0",
     "fake-indexeddb": "^3.1.7",
+    "http-server": "^14.0.0",
     "husky": "^7.0.4",
     "jest": "^27.3.1",
     "jest-junit": "^13.0.0",

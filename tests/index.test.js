@@ -32,7 +32,7 @@ describe('IndexedDB', () => {
             { username: 'n1md7', password: 'passwd' },
             { username: 'admin', password: 'admin123' },
           ],
-          structure: {
+          indexes: {
             username: { unique: true, multiEntry: false },
             password: { unique: false, multiEntry: false },
           },
@@ -71,7 +71,7 @@ describe('IndexedDB', () => {
             unique: true,
           },
           initData,
-          structure: {
+          indexes: {
             username: { unique: true, multiEntry: false },
             password: { unique: false, multiEntry: false },
           },
@@ -103,7 +103,7 @@ describe('IndexedDB', () => {
             { username: 'n1md7', password: 'passwd' },
             { username: 'admin', password: 'admin123' },
           ],
-          structure: {
+          indexes: {
             username: { unique: true, multiEntry: false },
             password: { unique: false, multiEntry: false },
           },
@@ -131,7 +131,7 @@ describe('IndexedDB', () => {
             { username: 'n1md7', password: 'passwd' },
             { username: 'admin', password: 'admin123' },
           ],
-          structure: {
+          indexes: {
             username: { unique: true, multiEntry: false },
             password: { unique: false, multiEntry: false },
           },
@@ -141,6 +141,36 @@ describe('IndexedDB', () => {
 
     const db = new DB();
     expect(db.selectAll()).resolves.toHaveLength(2);
+  });
+
+  it('should verify .selectByIndex', () => {
+    class DB extends IndexedDB.Model {
+      get config() {
+        return {
+          version: 1,
+          databaseName: `Test-db-0${ref.i}`,
+          tableName: 'users',
+          primaryKey: {
+            name: 'username',
+            autoIncrement: false,
+            unique: true,
+          },
+          initData: [
+            { username: 'n1md7', password: 'passwd' },
+            { username: 'admin', password: 'admin123' },
+          ],
+          indexes: {
+            username: { unique: true, multiEntry: false },
+            password: { unique: false, multiEntry: false },
+          },
+        };
+      }
+    }
+
+    const db = new DB();
+    db.selectByIndex('username', 'admin').then((data) => {
+      expect(data).toEqual({ username: 'admin', password: 'admin123' });
+    });
   });
 
   it('should verify .select', async () => {
@@ -159,7 +189,7 @@ describe('IndexedDB', () => {
             { username: 'n1md7', password: 'passwd' },
             { username: 'admin', password: 'admin123' },
           ],
-          structure: {
+          indexes: {
             username: { unique: true, multiEntry: false },
             password: { unique: false, multiEntry: false },
           },
@@ -244,7 +274,7 @@ describe('IndexedDB', () => {
             { username: 'n1md7', password: 'passwd' },
             { username: 'admin', password: 'admin123' },
           ],
-          structure: {
+          indexes: {
             username: { unique: true, multiEntry: false },
             password: { unique: false, multiEntry: false },
           },
@@ -279,7 +309,7 @@ describe('IndexedDB', () => {
             { username: 'n1md7', password: 'passwd' },
             { username: 'admin', password: 'admin123' },
           ],
-          structure: {
+          indexes: {
             username: { unique: true, multiEntry: false },
             password: { unique: false, multiEntry: false },
           },
@@ -290,7 +320,7 @@ describe('IndexedDB', () => {
     const db = new DB();
     const deleted = await db.deleteByPk('admin');
     expect(deleted).toEqual('admin');
-    expect(await db.selectByPk('admin')).toBeNull();
+    expect(await db.selectByPk('admin')).toBeUndefined();
   });
 
   it('should throw not a valid key', () => {
@@ -309,16 +339,17 @@ describe('IndexedDB', () => {
             { username: 'n1md7', password: 'passwd' },
             { username: 'admin', password: 'admin123' },
           ],
-          structure: {
+          indexes: {
             username: { unique: true, multiEntry: false },
             password: { unique: false, multiEntry: false },
           },
         };
       }
     }
+
     expect(() => {
       new DB().insert({ name: 'n1md7', password: 'passwd' });
-    }).toThrow('is not a valid key. Not defined in configuration [structure].');
+    }).toThrow();
   });
 
   it('should verify config', () => {
@@ -335,11 +366,12 @@ describe('IndexedDB', () => {
         { username: 'n1md7', password: 'passwd' },
         { username: 'admin', password: 'admin123' },
       ],
-      structure: {
+      indexes: {
         username: { unique: true, multiEntry: false },
         password: { unique: false, multiEntry: false },
       },
     };
+
     class DB extends IndexedDB.Model {
       get config() {
         return config;
@@ -366,7 +398,7 @@ describe('IndexedDB', () => {
             { username: 'n1md7', password: 'passwd' },
             { username: 'admin', password: 'admin123' },
           ],
-          structure: {
+          indexes: {
             username: { unique: true, multiEntry: false },
             password: { unique: false, multiEntry: false },
           },
@@ -399,7 +431,7 @@ describe('IndexedDB', () => {
             { username: 'n1md7', password: 'passwd' },
             { username: 'admin', password: 'admin123' },
           ],
-          structure: {
+          indexes: {
             username: { unique: true, multiEntry: false },
             password: { unique: false, multiEntry: false },
           },

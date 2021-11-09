@@ -21,10 +21,8 @@
               unique: true,
             },
             initData: [],
-            structure: {
+            indexes: {
               roomId: { unique: false },
-              roomName: { unique: false },
-              comment: { unique: false },
             },
           };
         }
@@ -38,9 +36,9 @@
         roomName: 'My room name',
         comment: 'This room is awesome',
       })
-        .then(function (resp) {
+        .then(function (data, resp) {
           //when done click update button
-          console.info('Yay, you have saved the data in ' + resp.name);
+          console.info('Yay, you have saved the data in ' + data);
         })
         .catch(function (error) {
           console.error(error);

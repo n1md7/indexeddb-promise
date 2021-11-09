@@ -32,6 +32,7 @@ or
 - select
 - insert
 - selectAll
+- selectByIndex
 - selectByPk
 - updateByPk
 - deleteByPk
@@ -39,6 +40,10 @@ or
 ### .selectAll(): Promise
 
 Gets all the data from db and returns promise with response data
+
+### .selectByIndex(indexName: string, valueToMatch: string): Promise
+
+Gets data from the db and returns promise with response data
 
 ### .selectByPk(pKey: string): Promise
 
@@ -93,7 +98,7 @@ props = {
 };
 ```
 
-### .updateByPk(pKey, {...}): Promise
+### .updateByPk(pKey: string | number, {...}): Promise
 
 Has two parameters `pkey` and `keyValue` pair of updated data
 
@@ -149,7 +154,7 @@ class DB extends IndexedDBModel.Model {
         unique: true,
       },
       initData: [],
-      structure: {
+      indexes: {
         username: { unique: false, autoIncrement: false },
         password: { unique: false, autoIncrement: false },
         createdAt: { unique: false, autoIncrement: false },
@@ -189,11 +194,9 @@ const db = new DB();
               unique: true,
             },
             initData: [],
-            structure: {
+            indexes: {
               username: { unique: false, autoIncrement: false },
               password: { unique: false, autoIncrement: false },
-              createdAt: { unique: false, autoIncrement: false },
-              updatedAt: { unique: false, autoIncrement: false },
             },
           };
         }

@@ -13,7 +13,7 @@ const arraySorter = require('./array-sorter');
  *   initData?: Array<{
  *     [key: string]: any,
  *   }>,
- *   structure: {
+ *   indexes: {
  *      [key: string]: {
  *        unique?: boolean,
  *        multiEntry?: boolean,
@@ -39,7 +39,7 @@ class Model {
       const request = window.indexedDB.open(this.config.databaseName || 'db', version);
 
       request.onerror = function (event) {
-        return reject('Unexpected exception: ', event.target || event);
+        return reject(request.error || "Make sure you aren't inserting duplicated data for indexed unique values");
       };
 
       request.onsuccess = function () {
@@ -65,18 +65,18 @@ class Model {
           db.objectStoreNames.contains(this.config.tableName)
         ) {
           db.deleteObjectStore(this.config.tableName);
-          console.info('Table: ', this.config.tableName, ' removed');
+          console.info(`DB version changed, therefore table: ${this.config.tableName} has removed`);
         }
         const store = db.createObjectStore(this.config.tableName, {
           keyPath: this.config.primaryKey?.name || 'id',
           autoIncrement: this.config.primaryKey?.autoIncrement || true,
         });
 
-        for (const key in this.config.structure) {
-          if (this.config.structure.hasOwnProperty(key)) {
-            store.createIndex(`Index-${key}`, key, {
-              unique: !!this.config.structure[key].unique,
-              multiEntry: !!this.config.structure[key].multiEntry,
+        for (const key in this.config.indexes) {
+          if (Reflect.has(this.config.indexes, key)) {
+            store.createIndex(key, key, {
+              unique: !!this.config.indexes[key].unique,
+              multiEntry: !!this.config.indexes[key].multiEntry,
             });
           }
         }
@@ -102,27 +102,20 @@ class Model {
         autoIncrement: true,
       },
       initData: [],
-      structure: {
-        roomId: { unique: false, multiEntry: true },
-        roomName: { unique: false, multiEntry: false },
-        task: { unique: false, multiEntry: false },
+      indexes: {
+        id: { unique: false, multiEntry: true },
+        username: { unique: false, multiEntry: false },
       },
     };
   }
 
   /**
-   * @description This method is used to get the structure of the table, verify and return it.
+   * @description This method is used to get the indexes of the table, verify and return it.
    * @param {{[key:string]: any}} data
    * @returns {{[key:string]: any}}
    */
   verify(data) {
     const keys = Object.keys(data);
-    for (const key of keys) {
-      if (!this.config.structure?.[key] && this.config.primaryKey?.name !== key) {
-        throw new Error(`{${key}} is not a valid key. Not defined in configuration [structure].`);
-      }
-    }
-
     if (this.config.primaryKey?.autoIncrement === false) {
       if (!keys.includes(this.config.primaryKey?.name)) {
         throw new Error('Either include primary key as well or set {autoincrement: true}.');
@@ -146,14 +139,8 @@ class Model {
           .transaction([this.tableName], 'readwrite')
           .objectStore(this.tableName)
           .add(verifiedInsertData);
-
-        request.onsuccess = function () {
-          return resolve(data, db);
-        };
-
-        request.onerror = function () {
-          reject('Unable to add data. Check the unique values');
-        };
+        request.onsuccess = () => resolve(data, db);
+        request.onerror = () => reject(request.error || 'Unable to add data. Check the unique values');
       });
     });
   }
@@ -161,7 +148,7 @@ class Model {
   /**
    * @description This method is used to select data from the table by Primary key.
    * @param {string} pKey
-   * @returns {Promise<ListItem|null>}
+   * @returns {Promise<ListItem|null|undefined>}
    */
   selectByPk(pKey) {
     return new Promise((resolve, reject) => {
@@ -169,15 +156,26 @@ class Model {
         const transaction = db.transaction([this.tableName]);
         const objectStore = transaction.objectStore(this.tableName);
         const request = objectStore.get(pKey);
-        request.onerror = function () {
-          return reject('Unable to retrieve data from the model');
-        };
-        request.onsuccess = function () {
-          if (request.result) {
-            return resolve(request.result);
-          }
-          resolve(null);
-        };
+        request.onerror = () => reject(request.error || 'Unable to retrieve data from the model');
+        request.onsuccess = () => resolve(request.result);
+      });
+    });
+  }
+
+  /**
+   * @description This method is used to select data from the table by defined Index key.
+   * @param {string} indexName
+   * @param {string} value
+   * @returns {Promise<ListItem|null|undefined>}
+   */
+  selectByIndex(indexName, value) {
+    return new Promise((resolve, reject) => {
+      this.fingersCrossed.then((db) => {
+        const transaction = db.transaction([this.tableName]);
+        const objectStore = transaction.objectStore(this.tableName);
+        const request = objectStore.index(indexName).get(value);
+        request.onerror = () => reject(request.error || `Unable to retrieve data from the model by ${indexName}`);
+        request.onsuccess = () => resolve(request.result);
       });
     });
   }
@@ -191,16 +189,8 @@ class Model {
       this.fingersCrossed.then((db) => {
         const objectStore = db.transaction(this.tableName).objectStore(this.tableName);
         const request = objectStore.getAll();
-        request.onsuccess = () => {
-          if (request.result) {
-            return resolve(request.result);
-          } else {
-            return reject('No result found');
-          }
-        };
-        request.onerror = function () {
-          return reject("Can't get data from database");
-        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || "Can't get data from database");
       });
     });
   }
@@ -278,12 +268,8 @@ class Model {
           const store = transaction.objectStore(this.tableName);
           const data = Object.assign(fetchedData, dataToUpdate);
           const save = store.put(data);
-          save.onsuccess = function () {
-            return resolve(data);
-          };
-          save.onerror = function () {
-            return reject('Cannot update data');
-          };
+          save.onsuccess = () => resolve(data);
+          save.onerror = () => reject(save.error || 'Cannot update data');
         });
       });
     });
@@ -297,13 +283,10 @@ class Model {
   deleteByPk(pKey) {
     return new Promise((resolve, reject) => {
       this.fingersCrossed.then((db) => {
-        const request = db.transaction([this.tableName], 'readwrite').objectStore(this.tableName).delete(pKey);
-        request.onsuccess = function () {
-          return resolve(pKey);
-        };
-        request.onerror = function () {
-          return reject("Couldn't remove an item");
-        };
+        const transaction = db.transaction([this.tableName], 'readwrite');
+        const request = transaction.objectStore(this.tableName).delete(pKey);
+        request.onsuccess = () => resolve(pKey);
+        request.onerror = () => reject(request.error || "Couldn't remove an item");
       });
     });
   }
