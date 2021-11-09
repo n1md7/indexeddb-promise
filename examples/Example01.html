@@ -1,4 +1,4 @@
-<html>
+<!DOCTYPE html>
   <head>
     <title>IndexedDB app</title>
     <script src="../dist/indexed-db.min.js"></script>
@@ -6,29 +6,20 @@
   <body>
     <h1>Check the console</h1>
     <script>
-      const { Model } = IndexedDB;
-
-      class DB extends IndexedDB.Model {
-        //@overrides default method
-        get config() {
-          return {
-            version: 1,
-            databaseName: 'boo',
-            tableName: 'myNewTable',
-            primaryKey: {
-              name: 'id',
-              autoIncrement: true,
-              unique: true,
-            },
-            initData: [],
-            indexes: {
-              roomId: { unique: false },
-            },
-          };
-        }
-      }
-
-      const db = new DB();
+      const db =  IndexedDB.Model({
+        version: 1,
+        databaseName: 'boo',
+        tableName: 'myNewTable',
+        primaryKey: {
+          name: 'id',
+          autoIncrement: true,
+          unique: true,
+        },
+        initData: [],
+        indexes: {
+          roomId: { unique: false },
+        },
+      });
 
       // add new record
       db.insert({
@@ -36,7 +27,7 @@
         roomName: 'My room name',
         comment: 'This room is awesome',
       })
-        .then(function (data, resp) {
+        .then(function (data) {
           //when done click update button
           console.info('Yay, you have saved the data in ' + data);
         })

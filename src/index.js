@@ -23,7 +23,24 @@ const arraySorter = require('./array-sorter');
  */
 
 class Model {
-  constructor() {
+  /**
+   * @param {Config} config
+   */
+  constructor(config) {
+    this.config = config || {
+      version: 1,
+      databaseName: 'DefaultDatabase',
+      tableName: 'DefaultTable',
+      primaryKey: {
+        name: 'id',
+        autoIncrement: true,
+      },
+      initData: [],
+      indexes: {
+        id: { unique: false, multiEntry: true },
+        username: { unique: false, multiEntry: false },
+      },
+    };
     this.tableName = this.config.tableName || 'table';
 
     if (Array.isArray(this.config)) {
@@ -86,27 +103,6 @@ class Model {
         }
       };
     });
-  }
-
-  /**
-   * @constructor
-   * @returns {Config}
-   */
-  get config() {
-    return {
-      version: 1,
-      databaseName: 'DefaultDatabase',
-      tableName: 'DefaultTable',
-      primaryKey: {
-        name: 'id',
-        autoIncrement: true,
-      },
-      initData: [],
-      indexes: {
-        id: { unique: false, multiEntry: true },
-        username: { unique: false, multiEntry: false },
-      },
-    };
   }
 
   /**

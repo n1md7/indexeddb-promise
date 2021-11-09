@@ -17,30 +17,24 @@ describe('IndexedDB', () => {
   });
 
   it('should create store and verify methods', () => {
-    class DB extends IndexedDB.Model {
-      get config() {
-        return {
-          version: 1,
-          databaseName: `Test-db-0${ref.i}`,
-          tableName: 'users',
-          primaryKey: {
-            name: 'username',
-            autoIncrement: false,
-            unique: true,
-          },
-          initData: [
-            { username: 'n1md7', password: 'passwd' },
-            { username: 'admin', password: 'admin123' },
-          ],
-          indexes: {
-            username: { unique: true, multiEntry: false },
-            password: { unique: false, multiEntry: false },
-          },
-        };
-      }
-    }
-
-    const db = new DB();
+    const db = new IndexedDB.Model({
+      version: 1,
+      databaseName: `Test-db-0${ref.i}`,
+      tableName: 'users',
+      primaryKey: {
+        name: 'username',
+        autoIncrement: false,
+        unique: true,
+      },
+      initData: [
+        { username: 'n1md7', password: 'passwd' },
+        { username: 'admin', password: 'admin123' },
+      ],
+      indexes: {
+        username: { unique: true, multiEntry: false },
+        password: { unique: false, multiEntry: false },
+      },
+    });
     expect(db.config).toBeDefined();
     expect(db.fingersCrossed).toBeDefined();
     expect(db.tableName).toBeDefined();
@@ -59,27 +53,21 @@ describe('IndexedDB', () => {
       { username: 'admin', password: 'admin123' },
     ];
 
-    class DB extends IndexedDB.Model {
-      get config() {
-        return {
-          version: 1,
-          databaseName: `Test-db-0${ref.i}`,
-          tableName: 'users',
-          primaryKey: {
-            name: 'username',
-            autoIncrement: false,
-            unique: true,
-          },
-          initData,
-          indexes: {
-            username: { unique: true, multiEntry: false },
-            password: { unique: false, multiEntry: false },
-          },
-        };
-      }
-    }
-
-    const db = new DB();
+    const db = new IndexedDB.Model({
+      version: 1,
+      databaseName: `Test-db-0${ref.i}`,
+      tableName: 'users',
+      primaryKey: {
+        name: 'username',
+        autoIncrement: false,
+        unique: true,
+      },
+      initData,
+      indexes: {
+        username: { unique: true, multiEntry: false },
+        password: { unique: false, multiEntry: false },
+      },
+    });
     const data = { username: 'michael', password: 'passwd' };
     db.insert(data).then((inserted) => {
       expect(inserted).toEqual(data);
@@ -88,116 +76,92 @@ describe('IndexedDB', () => {
   });
 
   it('should verify .selectByPk', () => {
-    class DB extends IndexedDB.Model {
-      get config() {
-        return {
-          version: 1,
-          databaseName: `Test-db-0${ref.i}`,
-          tableName: 'users',
-          primaryKey: {
-            name: 'username',
-            autoIncrement: false,
-            unique: true,
-          },
-          initData: [
-            { username: 'n1md7', password: 'passwd' },
-            { username: 'admin', password: 'admin123' },
-          ],
-          indexes: {
-            username: { unique: true, multiEntry: false },
-            password: { unique: false, multiEntry: false },
-          },
-        };
-      }
-    }
-
-    const db = new DB();
+    const db = new IndexedDB.Model({
+      version: 1,
+      databaseName: `Test-db-0${ref.i}`,
+      tableName: 'users',
+      primaryKey: {
+        name: 'username',
+        autoIncrement: false,
+        unique: true,
+      },
+      initData: [
+        { username: 'n1md7', password: 'passwd' },
+        { username: 'admin', password: 'admin123' },
+      ],
+      indexes: {
+        username: { unique: true, multiEntry: false },
+        password: { unique: false, multiEntry: false },
+      },
+    });
     expect(db.selectByPk('admin')).resolves.toEqual({ username: 'admin', password: 'admin123' });
   });
 
   it('should verify .selectAll', () => {
-    class DB extends IndexedDB.Model {
-      get config() {
-        return {
-          version: 1,
-          databaseName: `Test-db-0${ref.i}`,
-          tableName: 'users',
-          primaryKey: {
-            name: 'username',
-            autoIncrement: false,
-            unique: true,
-          },
-          initData: [
-            { username: 'n1md7', password: 'passwd' },
-            { username: 'admin', password: 'admin123' },
-          ],
-          indexes: {
-            username: { unique: true, multiEntry: false },
-            password: { unique: false, multiEntry: false },
-          },
-        };
-      }
-    }
-
-    const db = new DB();
+    const db = new IndexedDB.Model({
+      version: 1,
+      databaseName: `Test-db-0${ref.i}`,
+      tableName: 'users',
+      primaryKey: {
+        name: 'username',
+        autoIncrement: false,
+        unique: true,
+      },
+      initData: [
+        { username: 'n1md7', password: 'passwd' },
+        { username: 'admin', password: 'admin123' },
+      ],
+      indexes: {
+        username: { unique: true, multiEntry: false },
+        password: { unique: false, multiEntry: false },
+      },
+    });
     expect(db.selectAll()).resolves.toHaveLength(2);
   });
 
   it('should verify .selectByIndex', () => {
-    class DB extends IndexedDB.Model {
-      get config() {
-        return {
-          version: 1,
-          databaseName: `Test-db-0${ref.i}`,
-          tableName: 'users',
-          primaryKey: {
-            name: 'username',
-            autoIncrement: false,
-            unique: true,
-          },
-          initData: [
-            { username: 'n1md7', password: 'passwd' },
-            { username: 'admin', password: 'admin123' },
-          ],
-          indexes: {
-            username: { unique: true, multiEntry: false },
-            password: { unique: false, multiEntry: false },
-          },
-        };
-      }
-    }
-
-    const db = new DB();
+    const db = new IndexedDB.Model({
+      version: 1,
+      databaseName: `Test-db-0${ref.i}`,
+      tableName: 'users',
+      primaryKey: {
+        name: 'username',
+        autoIncrement: false,
+        unique: true,
+      },
+      initData: [
+        { username: 'n1md7', password: 'passwd' },
+        { username: 'admin', password: 'admin123' },
+      ],
+      indexes: {
+        username: { unique: true, multiEntry: false },
+        password: { unique: false, multiEntry: false },
+      },
+    });
     db.selectByIndex('username', 'admin').then((data) => {
       expect(data).toEqual({ username: 'admin', password: 'admin123' });
     });
   });
 
   it('should verify .select', async () => {
-    class DB extends IndexedDB.Model {
-      get config() {
-        return {
-          version: 1,
-          databaseName: `Test-db-0${ref.i}`,
-          tableName: 'users',
-          primaryKey: {
-            name: 'username',
-            autoIncrement: false,
-            unique: true,
-          },
-          initData: [
-            { username: 'n1md7', password: 'passwd' },
-            { username: 'admin', password: 'admin123' },
-          ],
-          indexes: {
-            username: { unique: true, multiEntry: false },
-            password: { unique: false, multiEntry: false },
-          },
-        };
-      }
-    }
-
-    const db = new DB();
+    const db = new IndexedDB.Model({
+      version: 1,
+      databaseName: `Test-db-0${ref.i}`,
+      tableName: 'users',
+      primaryKey: {
+        name: 'username',
+        autoIncrement: false,
+        unique: true,
+      },
+      initData: [
+        { username: 'n1md7', password: 'passwd' },
+        { username: 'admin', password: 'admin123' },
+      ],
+      indexes: {
+        username: { unique: true, multiEntry: false },
+        password: { unique: false, multiEntry: false },
+      },
+    });
     expect(
       await db.select({
         where: {
@@ -259,30 +223,24 @@ describe('IndexedDB', () => {
   });
 
   it('should verify .updateByPk', async () => {
-    class DB extends IndexedDB.Model {
-      get config() {
-        return {
-          version: 1,
-          databaseName: `Test-db-0${ref.i}`,
-          tableName: 'users',
-          primaryKey: {
-            name: 'username',
-            autoIncrement: false,
-            unique: true,
-          },
-          initData: [
-            { username: 'n1md7', password: 'passwd' },
-            { username: 'admin', password: 'admin123' },
-          ],
-          indexes: {
-            username: { unique: true, multiEntry: false },
-            password: { unique: false, multiEntry: false },
-          },
-        };
-      }
-    }
-
-    const db = new DB();
+    const db = new IndexedDB.Model({
+      version: 1,
+      databaseName: `Test-db-0${ref.i}`,
+      tableName: 'users',
+      primaryKey: {
+        name: 'username',
+        autoIncrement: false,
+        unique: true,
+      },
+      initData: [
+        { username: 'n1md7', password: 'passwd' },
+        { username: 'admin', password: 'admin123' },
+      ],
+      indexes: {
+        username: { unique: true, multiEntry: false },
+        password: { unique: false, multiEntry: false },
+      },
+    });
     const update = await db.updateByPk('admin', {
       password: 'strongerPassword',
     });
@@ -294,61 +252,49 @@ describe('IndexedDB', () => {
   });
 
   it('should verify .deleteByPk', async () => {
-    class DB extends IndexedDB.Model {
-      get config() {
-        return {
-          version: 1,
-          databaseName: `Test-db-0${ref.i}`,
-          tableName: 'users',
-          primaryKey: {
-            name: 'username',
-            autoIncrement: false,
-            unique: true,
-          },
-          initData: [
-            { username: 'n1md7', password: 'passwd' },
-            { username: 'admin', password: 'admin123' },
-          ],
-          indexes: {
-            username: { unique: true, multiEntry: false },
-            password: { unique: false, multiEntry: false },
-          },
-        };
-      }
-    }
-
-    const db = new DB();
+    const db = new IndexedDB.Model({
+      version: 1,
+      databaseName: `Test-db-0${ref.i}`,
+      tableName: 'users',
+      primaryKey: {
+        name: 'username',
+        autoIncrement: false,
+        unique: true,
+      },
+      initData: [
+        { username: 'n1md7', password: 'passwd' },
+        { username: 'admin', password: 'admin123' },
+      ],
+      indexes: {
+        username: { unique: true, multiEntry: false },
+        password: { unique: false, multiEntry: false },
+      },
+    });
     const deleted = await db.deleteByPk('admin');
     expect(deleted).toEqual('admin');
     expect(await db.selectByPk('admin')).toBeUndefined();
   });
 
   it('should throw not a valid key', () => {
-    class DB extends IndexedDB.Model {
-      get config() {
-        return {
-          version: 1,
-          databaseName: `Test-db-0${ref.i}`,
-          tableName: 'users',
-          primaryKey: {
-            name: 'username',
-            autoIncrement: false,
-            unique: true,
-          },
-          initData: [
-            { username: 'n1md7', password: 'passwd' },
-            { username: 'admin', password: 'admin123' },
-          ],
-          indexes: {
-            username: { unique: true, multiEntry: false },
-            password: { unique: false, multiEntry: false },
-          },
-        };
-      }
-    }
-
     expect(() => {
-      new DB().insert({ name: 'n1md7', password: 'passwd' });
+      new IndexedDB.Model({
+        version: 1,
+        databaseName: `Test-db-0${ref.i}`,
+        tableName: 'users',
+        primaryKey: {
+          name: 'username',
+          autoIncrement: false,
+          unique: true,
+        },
+        initData: [
+          { username: 'n1md7', password: 'passwd' },
+          { username: 'admin', password: 'admin123' },
+        ],
+        indexes: {
+          username: { unique: true, multiEntry: false },
+          password: { unique: false, multiEntry: false },
+        },
+      }).insert({ name: 'n1md7', password: 'passwd' });
     }).toThrow();
   });
 
@@ -372,42 +318,30 @@ describe('IndexedDB', () => {
       },
     };
 
-    class DB extends IndexedDB.Model {
-      get config() {
-        return config;
-      }
-    }
-
-    const db = new DB();
+    const db = new IndexedDB.Model(config);
     expect(db.config).toEqual(config);
   });
 
   it('should throw Either include primary key as well or set {autoincrement: true}.', () => {
-    class DB extends IndexedDB.Model {
-      get config() {
-        return {
-          version: 1,
-          databaseName: `Test-db-0${ref.i}`,
-          tableName: 'users',
-          primaryKey: {
-            name: 'username',
-            autoIncrement: false,
-            unique: false,
-          },
-          initData: [
-            { username: 'n1md7', password: 'passwd' },
-            { username: 'admin', password: 'admin123' },
-          ],
-          indexes: {
-            username: { unique: true, multiEntry: false },
-            password: { unique: false, multiEntry: false },
-          },
-        };
-      }
-    }
-
     expect(() => {
-      new DB().insert({ password: 'passwd' });
+      new IndexedDB.Model({
+        version: 1,
+        databaseName: `Test-db-0${ref.i}`,
+        tableName: 'users',
+        primaryKey: {
+          name: 'username',
+          autoIncrement: false,
+          unique: false,
+        },
+        initData: [
+          { username: 'n1md7', password: 'passwd' },
+          { username: 'admin', password: 'admin123' },
+        ],
+        indexes: {
+          username: { unique: true, multiEntry: false },
+          password: { unique: false, multiEntry: false },
+        },
+      }).insert({ password: 'passwd' });
     }).toThrow('Either include primary key as well or set {autoincrement: true}.');
   });
 
@@ -416,30 +350,24 @@ describe('IndexedDB', () => {
       throw new Error('Unsupported environment');
     });
 
-    class DB extends IndexedDB.Model {
-      get config() {
-        return {
-          version: 1,
-          databaseName: `Test-db-0${ref.i}`,
-          tableName: 'users',
-          primaryKey: {
-            name: 'username',
-            autoIncrement: false,
-            unique: true,
-          },
-          initData: [
-            { username: 'n1md7', password: 'passwd' },
-            { username: 'admin', password: 'admin123' },
-          ],
-          indexes: {
-            username: { unique: true, multiEntry: false },
-            password: { unique: false, multiEntry: false },
-          },
-        };
-      }
-    }
-
-    new DB().fingersCrossed.catch((err) => {
+    new IndexedDB.Model({
+      version: 1,
+      databaseName: `Test-db-0${ref.i}`,
+      tableName: 'users',
+      primaryKey: {
+        name: 'username',
+        autoIncrement: false,
+        unique: true,
+      },
+      initData: [
+        { username: 'n1md7', password: 'passwd' },
+        { username: 'admin', password: 'admin123' },
+      ],
+      indexes: {
+        username: { unique: true, multiEntry: false },
+        password: { unique: false, multiEntry: false },
+      },
+    }).fingersCrossed.catch((err) => {
       expect(err).toBeInstanceOf(Error);
       expect(err.message).toBe('Unsupported environment');
     });
@@ -450,14 +378,8 @@ describe('IndexedDB', () => {
       throw new Error('Unsupported environment');
     });
 
-    class DB extends IndexedDB.Model {
-      get config() {
-        return [];
-      }
-    }
-
     expect(() => {
-      new DB();
+      new IndexedDB.Model([]);
     }).toThrow('Config has to be an Object');
   });
 });

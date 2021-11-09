@@ -138,37 +138,24 @@ const { Model } = IndexedDBModel;
 const Model = IndexedDBModel.Model;
 ```
 
-### Create example config
+### Create connector and pass the config
 
 ```javascript
-class DB extends IndexedDBModel.Model {
-  //@overrides default method
-  get config() {
-    return {
-      version: 1,
-      databaseName: 'myNewDatabase',
-      tableName: 'myNewTable',
-      primaryKey: {
-        name: 'id',
-        autoIncrement: false,
-        unique: true,
-      },
-      initData: [],
-      indexes: {
-        username: { unique: false, autoIncrement: false },
-        password: { unique: false, autoIncrement: false },
-        createdAt: { unique: false, autoIncrement: false },
-        updatedAt: { unique: false, autoIncrement: false },
-      },
-    };
-  }
-}
-```
-
-### Create connector
-
-```javascript
-const db = new DB();
+const db = new IndexedDBModel.Model({
+  version: 1,
+  databaseName: 'myNewDatabase',
+  tableName: 'myNewTable',
+  primaryKey: {
+    name: 'id',
+    autoIncrement: false,
+    unique: true,
+  },
+  initData: [],
+  indexes: {
+    username: { unique: false, autoIncrement: false },
+    password: { unique: false, autoIncrement: false },
+  },
+});
 ```
 
 ### Full example
@@ -181,28 +168,21 @@ const db = new DB();
   </head>
   <body>
     <script>
-      class DB extends IndexedDBModel.Model {
-        //@overrides default method
-        get config() {
-          return {
-            version: 1,
-            databaseName: 'myNewDatabase',
-            tableName: 'myNewTable',
-            primaryKey: {
-              name: 'id',
-              autoIncrement: false,
-              unique: true,
-            },
-            initData: [],
-            indexes: {
-              username: { unique: false, autoIncrement: false },
-              password: { unique: false, autoIncrement: false },
-            },
-          };
-        }
-      }
-
-      const db = new DB();
+      const db = new IndexedDBModel.Model({
+        version: 1,
+        databaseName: 'myNewDatabase',
+        tableName: 'myNewTable',
+        primaryKey: {
+          name: 'id',
+          autoIncrement: false,
+          unique: true,
+        },
+        initData: [],
+        indexes: {
+          username: { unique: false, autoIncrement: false },
+          password: { unique: false, autoIncrement: false },
+        },
+      });
 
       // add a new record
       db.insert({

@@ -76,44 +76,37 @@
       // This is ES6 feature
       const { Model } = IndexedDB;
 
-      class DB extends IndexedDB.Model {
-        //@overrides default method
-        get config() {
-          return {
-            version: 11,
-            databaseName: 'Boo',
-            tableName: 'Users',
-            primaryKey: {
-              name: 'username',
-              autoIncrement: false,
-              unique: true,
-            },
-            initData: [
-              { username: 'James', password: 'james123', something: 'Some text' },
-              { username: 'CokeZero', password: 'zero123', something: 'Some text' },
-              { username: 'n1md7', password: 'nimdaPass' },
-              { username: 'n1md7@', password: 'nimdaPass' },
-              {
-                username: 'admin',
-                password: 'admin123',
-                my: 'user',
-                is: 'admin',
-                the: 'admin',
-                admin: 'admin',
-                admin123: 'admin123',
-              },
-              { username: 'indexed', password: 'indexedDbUser' },
-            ],
-            indexes: {
-              username: { unique: true, multiEntry: false },
-              something: { unique: false, multiEntry: false },
-            },
-          };
-        }
-      }
-
       // create new instance of connector
-      const db = new DB();
+      const db = new Model({
+        version: 12,
+        databaseName: 'Boo',
+        tableName: 'Users',
+        primaryKey: {
+          name: 'username',
+          autoIncrement: false,
+          unique: true,
+        },
+        initData: [
+          { username: 'James', password: 'james123', something: 'Some text' },
+          { username: 'CokeZero', password: 'zero123', something: 'Some text' },
+          { username: 'n1md7', password: 'nimdaPass' },
+          { username: 'n1md7@', password: 'nimdaPass' },
+          {
+            username: 'admin',
+            password: 'admin123',
+            my: 'user',
+            is: 'admin',
+            the: 'admin',
+            admin: 'admin',
+            admin123: 'admin123',
+          },
+          { username: 'indexed', password: 'indexedDbUser' },
+        ],
+        indexes: {
+          username: { unique: true, multiEntry: false },
+          something: { unique: false, multiEntry: false },
+        },
+      });
 
       $('#sign-up').on('submit', function (event) {
         event.preventDefault();
@@ -145,8 +138,8 @@
           username: username.val(),
           password: password.val(),
         })
-          .then(function (resp) {
-            console.log('Yay, data inserted in ', data, resp.name);
+          .then(function (data) {
+            console.log('Yay, data inserted in ', data);
             username.val('');
             password.val('');
             rePassword.val('');
