@@ -54,24 +54,7 @@ Has one parameter `pkey` as primaryKey and returns promise with data
 Has one parameter `props` which can be
 
 ```javascript
-/**
- * @typedef {string | number | boolean | null | undefined} Item
- */
-/**
- * @typedef {{[key: string]: Item} | Item} ListItem
- */
-/**
- * @param  {{
- *   where?: {
- *     [key: string]: any
- *   } | function(ListItem[]):ListItem[],
- *   limit?: number,
- *   orderByDESC?: boolean,
- *   sortBy?: string | string[]
- * }} options
- * @returns {Promise<ListItem[]>}
- */
-props = {
+const props = {
   limit: 10,
   where: (dataArray) => {
     return dataArray;
@@ -84,13 +67,15 @@ props = {
 @where property can filter out data like
 
 ```javascript
-where: (data) => data.filter((item) => item.username === 'admin');
+const props = {
+  where: (data) => data.filter((item) => item.username === 'admin'),
+};
 ```
 
 or it can be an object, which gets data with AND(&&) comparison
 
 ```javascript
-props = {
+const props = {
   where: {
     username: 'admin',
     password: 'admin123',
