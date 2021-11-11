@@ -1,4 +1,4 @@
-import Model from '../src';
+import { Model } from '../src';
 
 describe('IndexedDB', () => {
   const ref = { i: 1 };

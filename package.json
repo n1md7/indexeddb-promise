@@ -1,19 +1,19 @@
 {
   "name": "@n1md7/indexeddb-promise",
-  "version": "4.0.0",
+  "version": "5.0.5",
   "description": "Indexed DB wrapper with promises",
-  "main": "./src/index.js",
+  "main": "./lib/index.js",
   "scripts": {
-    "minify": "browserify ./src/index.ts -o ./dist/indexed-db.min.js --standalone=IndexedDB -t [ tsify --noImplicitAny --presets [ @babel/preset-env ] ]",
+    "build": "tsc",
+    "minify": "npx browserify ./lib/index.js -o ./dist/indexed-db.min.js --standalone=IndexedDB -t [ babelify --presets [ @babel/preset-env ] ]",
     "format": "npx prettier --write --ignore-unknown './(src|tests)/**/*.(j|t)s'",
-    "a": "npx browserify src/index.ts -p [ tsify --noImplicitAny ] > bundle.js",
     "test": "npx jest --coverage --ci",
     "prepare": "husky install",
     "serve": "npx http-server -o /examples ."
   },
   "author": "Harry Kodua",
   "license": "MIT",
-  "types": "./types",
+  "types": "./lib",
   "keywords": [
     "db",
     "indexed-db",
@@ -66,11 +66,6 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
-    ]
-  },
-  "browserify": {
-    "transform": [
-      "tsify"
     ]
   }
 }

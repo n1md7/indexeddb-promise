@@ -6,9 +6,8 @@
     "noImplicitAny": true,
     "moduleResolution": "node",
     "declaration": true,
-    "declarationDir": "./types",
     "sourceMap": true,
-    "outDir": "dist",
+    "outDir": "lib",
     "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*"]

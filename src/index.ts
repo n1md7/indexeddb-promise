@@ -31,7 +31,7 @@ export type Options<I, T extends keyof any = any> = {
   sortBy?: keyof I | keyof I[];
 };
 
-export default class Model<DataType extends any> {
+export class Model<DataType extends any> {
   protected readonly databaseName: string = 'DefaultDatabase';
   protected readonly tableName: string = 'DefaultTable';
   protected readonly version: number = 1;
@@ -223,7 +223,7 @@ export default class Model<DataType extends any> {
    * @description This method is used to update data in the table by primary key.
    * It combines original and updateData and the same keys will be overridden.
    */
-  updateByPk(pKey: string | number, dataToUpdate: Partial<DataType>): Promise<DataType | undefined> {
+  updateByPk(pKey: IDBValidKey | IDBKeyRange, dataToUpdate: Partial<DataType>): Promise<DataType | undefined> {
     return new Promise((resolve, reject) => {
       this.connection.then((db) => {
         this.selectByPk(pKey).then((fetchedData) => {
@@ -241,7 +241,7 @@ export default class Model<DataType extends any> {
   /**
    * @description This method is used to delete data from the table.
    */
-  deleteByPk(pKey: string | number): Promise<string | number | undefined> {
+  deleteByPk(pKey: IDBValidKey | IDBKeyRange): Promise<IDBValidKey | IDBKeyRange | undefined> {
     return new Promise((resolve, reject) => {
       this.connection.then((db) => {
         const transaction = db.transaction([this.tableName], 'readwrite');
