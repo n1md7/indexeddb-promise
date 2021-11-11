@@ -14,17 +14,17 @@
 ## Installation
 
 ```shell script
-npm install @n1md7/indexeddb-promise --save
+npm install @n1md7/indexeddb-connection --save
 # or
-yarn add @n1md7/indexeddb-promise
+yarn add @n1md7/indexeddb-connection
 ```
 
 or
 
 ```shell script
-<script src="https://bundle.run/@n1md7/indexeddb-promise@2.0.0"></script>
-<script src="https://unpkg.com/@n1md7/indexeddb-promise@2.0.0/src/index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@n1md7/indexeddb-promise@2.0.0/dist/indexed-db.min.js"></script>
+<script src="https://bundle.run/@n1md7/indexeddb-connection@2.0.0"></script>
+<script src="https://unpkg.com/@n1md7/indexeddb-connection@2.0.0/src/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@n1md7/indexeddb-connection@2.0.0/dist/indexed-db.min.js"></script>
 ```
 
 ### Available methods
@@ -39,15 +39,15 @@ or
 
 ### .selectAll(): Promise
 
-Gets all the data from db and returns promise with response data
+Gets all the data from db and returns connection with response data
 
 ### .selectByIndex(indexName: string, valueToMatch: string): Promise
 
-Gets data from the db and returns promise with response data
+Gets data from the db and returns connection with response data
 
 ### .selectByPk(pKey: string): Promise
 
-Has one parameter `pkey` as primaryKey and returns promise with data
+Has one parameter `pkey` as primaryKey and returns connection with data
 
 ### .select({...}): Promise
 
@@ -194,8 +194,8 @@ const db = new IndexedDBModel.Model({
 ```
 
 ```javascript
-const IndexedDBModel = require('@n1md7/indexeddb-promise');
+const IndexedDBModel = require('@n1md7/indexeddb-connection');
 const { Model } = IndexedDBModel;
 // or
-import { Model } from '@n1md7/indexeddb-promise';
+import { Model } from '@n1md7/indexeddb-connection';
 ```

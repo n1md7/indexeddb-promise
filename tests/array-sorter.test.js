@@ -1,5 +1,4 @@
-const arraySorter = require('../src/array-sorter');
-const { describe, it } = require('@jest/globals');
+import ArraySorter from '../src/array-sorter';
 
 describe.each([
   [null, [], true],
@@ -176,12 +175,12 @@ describe.each([
     false,
     { keys: ['key'], desc: false },
   ],
-])('ArraySorter(%o).sortBy(%o)', function (sortList, expected, _throws, sortBy) {
+])('ArraySorter Sorting %o; expecting %o; throws %s; sortingBy %o;', function (sortList, expected, _throws, sortBy) {
   it('should sort array', function () {
     if (_throws) {
-      expect(() => arraySorter(sortList).sortBy(sortBy)).toThrow();
+      expect(() => new ArraySorter(sortList).sortBy(sortBy)).toThrow();
     } else {
-      expect(arraySorter(sortList).sortBy(sortBy)).toEqual(expected);
+      expect(new ArraySorter(sortList).sortBy(sortBy)).toEqual(expected);
     }
   });
 });

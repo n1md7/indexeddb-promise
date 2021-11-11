@@ -1,5 +1,4 @@
-const IndexedDB = require('../src');
-const { describe, it, expect, beforeEach, jest } = require('@jest/globals');
+import Model from '../src';
 
 describe('IndexedDB', () => {
   const ref = { i: 1 };
@@ -13,11 +12,11 @@ describe('IndexedDB', () => {
   });
 
   it('should be defined', () => {
-    expect(IndexedDB).toBeDefined();
+    expect(Model).toBeDefined();
   });
 
   it('should create store and verify methods', () => {
-    const db = new IndexedDB.Model({
+    const db = new Model({
       version: 1,
       databaseName: `Test-db-0${ref.i}`,
       tableName: 'users',
@@ -35,10 +34,6 @@ describe('IndexedDB', () => {
         password: { unique: false, multiEntry: false },
       },
     });
-    expect(db.config).toBeDefined();
-    expect(db.fingersCrossed).toBeDefined();
-    expect(db.tableName).toBeDefined();
-    expect(db.verify).toBeDefined();
     expect(db.insert).toBeDefined();
     expect(db.selectAll).toBeDefined();
     expect(db.selectByPk).toBeDefined();
@@ -53,7 +48,7 @@ describe('IndexedDB', () => {
       { username: 'admin', password: 'admin123' },
     ];
 
-    const db = new IndexedDB.Model({
+    const db = new Model({
       version: 1,
       databaseName: `Test-db-0${ref.i}`,
       tableName: 'users',
@@ -76,7 +71,7 @@ describe('IndexedDB', () => {
   });
 
   it('should verify .selectByPk', () => {
-    const db = new IndexedDB.Model({
+    const db = new Model({
       version: 1,
       databaseName: `Test-db-0${ref.i}`,
       tableName: 'users',
@@ -98,7 +93,7 @@ describe('IndexedDB', () => {
   });
 
   it('should verify .selectAll', () => {
-    const db = new IndexedDB.Model({
+    const db = new Model({
       version: 1,
       databaseName: `Test-db-0${ref.i}`,
       tableName: 'users',
@@ -120,7 +115,7 @@ describe('IndexedDB', () => {
   });
 
   it('should verify .selectByIndex', () => {
-    const db = new IndexedDB.Model({
+    const db = new Model({
       version: 1,
       databaseName: `Test-db-0${ref.i}`,
       tableName: 'users',
@@ -144,7 +139,7 @@ describe('IndexedDB', () => {
   });
 
   it('should verify .select', async () => {
-    const db = new IndexedDB.Model({
+    const db = new Model({
       version: 1,
       databaseName: `Test-db-0${ref.i}`,
       tableName: 'users',
@@ -223,7 +218,7 @@ describe('IndexedDB', () => {
   });
 
   it('should verify .updateByPk', async () => {
-    const db = new IndexedDB.Model({
+    const db = new Model({
       version: 1,
       databaseName: `Test-db-0${ref.i}`,
       tableName: 'users',
@@ -252,7 +247,7 @@ describe('IndexedDB', () => {
   });
 
   it('should verify .deleteByPk', async () => {
-    const db = new IndexedDB.Model({
+    const db = new Model({
       version: 1,
       databaseName: `Test-db-0${ref.i}`,
       tableName: 'users',
@@ -275,29 +270,6 @@ describe('IndexedDB', () => {
     expect(await db.selectByPk('admin')).toBeUndefined();
   });
 
-  it('should throw not a valid key', () => {
-    expect(() => {
-      new IndexedDB.Model({
-        version: 1,
-        databaseName: `Test-db-0${ref.i}`,
-        tableName: 'users',
-        primaryKey: {
-          name: 'username',
-          autoIncrement: false,
-          unique: true,
-        },
-        initData: [
-          { username: 'n1md7', password: 'passwd' },
-          { username: 'admin', password: 'admin123' },
-        ],
-        indexes: {
-          username: { unique: true, multiEntry: false },
-          password: { unique: false, multiEntry: false },
-        },
-      }).insert({ name: 'n1md7', password: 'passwd' });
-    }).toThrow();
-  });
-
   it('should verify config', () => {
     const config = {
       version: 1,
@@ -318,31 +290,31 @@ describe('IndexedDB', () => {
       },
     };
 
-    const db = new IndexedDB.Model(config);
+    const db = new Model(config);
     expect(db.config).toEqual(config);
   });
 
-  it('should throw Either include primary key as well or set {autoincrement: true}.', () => {
-    expect(() => {
-      new IndexedDB.Model({
-        version: 1,
-        databaseName: `Test-db-0${ref.i}`,
-        tableName: 'users',
-        primaryKey: {
-          name: 'username',
-          autoIncrement: false,
-          unique: false,
-        },
-        initData: [
-          { username: 'n1md7', password: 'passwd' },
-          { username: 'admin', password: 'admin123' },
-        ],
-        indexes: {
-          username: { unique: true, multiEntry: false },
-          password: { unique: false, multiEntry: false },
-        },
-      }).insert({ password: 'passwd' });
-    }).toThrow('Either include primary key as well or set {autoincrement: true}.');
+  it('should throw Either include primary key as well or set {autoincrement: true}.', async () => {
+    const users = new Model({
+      version: 1,
+      databaseName: `Test-db-0${ref.i}`,
+      tableName: 'users',
+      primaryKey: {
+        name: 'username',
+        autoIncrement: false,
+        unique: false,
+      },
+      initData: [
+        { password: 'passwd' }, //missing username and it should throw
+      ],
+      indexes: {},
+    });
+
+    try {
+      await users.insert({ password: 'passwd' });
+    } catch (e) {
+      expect(e).toEqual('Either include primary key as well or set {autoincrement: true}.');
+    }
   });
 
   it('should throw Unsupported environment', () => {
@@ -350,7 +322,7 @@ describe('IndexedDB', () => {
       throw new Error('Unsupported environment');
     });
 
-    new IndexedDB.Model({
+    new Model({
       version: 1,
       databaseName: `Test-db-0${ref.i}`,
       tableName: 'users',
@@ -367,7 +339,7 @@ describe('IndexedDB', () => {
         username: { unique: true, multiEntry: false },
         password: { unique: false, multiEntry: false },
       },
-    }).fingersCrossed.catch((err) => {
+    }).connection.catch((err) => {
       expect(err).toBeInstanceOf(Error);
       expect(err.message).toBe('Unsupported environment');
     });
@@ -379,7 +351,7 @@ describe('IndexedDB', () => {
     });
 
     expect(() => {
-      new IndexedDB.Model([]);
+      new Model([]);
     }).toThrow('Config has to be an Object');
   });
 });

@@ -2,9 +2,9 @@ module.exports = {
   roots: ['<rootDir>'],
   transform: {
     '^.+\\.jsx?$': 'babel-jest',
+    '^.+\\.tsx?$': 'ts-jest',
   },
   testMatch: ['**/?(*.)+(spec|test).+(ts|js)'],
-  coveragePathIgnorePatterns: ['src/middleware'],
   testEnvironment: 'jsdom',
   coverageDirectory: './reports',
   reporters: [

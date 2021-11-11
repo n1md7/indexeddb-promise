@@ -4,14 +4,16 @@
   "description": "Indexed DB wrapper with promises",
   "main": "./src/index.js",
   "scripts": {
-    "minify": "browserify ./src/index.js -o ./dist/indexed-db.min.js --standalone=IndexedDB -t [ babelify --presets [ @babel/preset-env ] ]",
-    "format": "npx prettier --write --ignore-unknown './(src|tests)/**/*.js'",
+    "minify": "browserify ./src/index.ts -o ./dist/indexed-db.min.js --standalone=IndexedDB -t [ tsify --noImplicitAny --presets [ @babel/preset-env ] ]",
+    "format": "npx prettier --write --ignore-unknown './(src|tests)/**/*.(j|t)s'",
+    "a": "npx browserify src/index.ts -p [ tsify --noImplicitAny ] > bundle.js",
     "test": "npx jest --coverage --ci",
     "prepare": "husky install",
     "serve": "npx http-server -o /examples ."
   },
   "author": "Harry Kodua",
   "license": "MIT",
+  "types": "./types",
   "keywords": [
     "db",
     "indexed-db",
@@ -34,6 +36,7 @@
   "devDependencies": {
     "@babel/core": "^7.16.0",
     "@babel/preset-env": "^7.16.0",
+    "@babel/preset-typescript": "^7.16.0",
     "@jest/globals": "^27.3.1",
     "babel-jest": "^27.3.1",
     "babelify": "^10.0.0",
@@ -45,7 +48,10 @@
     "jest-junit": "^13.0.0",
     "jsdom": "^16.7.0",
     "lint-staged": "^11.2.6",
-    "prettier": "2.4.1"
+    "prettier": "2.4.1",
+    "ts-jest": "^27.0.7",
+    "tsify": "^5.0.4",
+    "utility-types": "^3.10.0"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
@@ -60,6 +66,11 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "browserify": {
+    "transform": [
+      "tsify"
     ]
   }
 }
