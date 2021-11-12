@@ -22,7 +22,7 @@ jobs:
           node-version: ${{ matrix.node-databaseVersion }}
           cache: 'npm'
       - name: Running installation
-        run: npm install
+        run: npm ci
       - name: Running tests
         run: npm test
       - name: Upload coverage to Codecov
