@@ -30,7 +30,7 @@
                   autocomplete="off"
                 />
                 <small class="form-text text-muted"
-                  >Enter <strong>unique</strong> username and have to match to <code>^[\w]{4,12}$</code></small
+                  >Enter <strong>unique</strong> username and have to match to <code>^[\w]{2,12}$</code></small
                 >
               </div>
               <div class="form-group">
@@ -73,46 +73,61 @@
       </section>
     </div>
     <script type="text/javascript">
-      // This is ES6 feature
-      const { Model } = IndexedDB;
-
-      // create new instance of connector
-      const db = new Model({
-        version: 12,
-        databaseName: 'Boo',
-        tableName: 'Users',
-        primaryKey: {
-          name: 'username',
-          autoIncrement: false,
-          unique: true,
-        },
-        initData: [
-          { username: 'James', password: 'james123', something: 'Some text' },
-          { username: 'CokeZero', password: 'zero123', something: 'Some text' },
-          { username: 'n1md7', password: 'nimdaPass' },
-          { username: 'n1md7@', password: 'nimdaPass' },
+      // create new instance of database connector
+      const db = new IndexedDB.Database({
+        version: 4,
+        name: 'MyDatabase',
+        tables: [
           {
-            username: 'admin',
-            password: 'admin123',
-            my: 'user',
-            is: 'admin',
-            the: 'admin',
-            admin: 'admin',
-            admin123: 'admin123',
+            name: 'users',
+            primaryKey: {
+              name: 'id',
+              autoIncrement: true,
+              unique: true,
+            },
+            initData: [
+              { username: 'James', password: 'james123', somethingElse: 'Some text' },
+              { username: 'CokeZero', password: 'zero123', elseSomething: 'another data' },
+              { username: 'n1md7', password: 'n1md7Pass' },
+              { username: 'n1md7@', password: 'n1md7@Pass' },
+              {
+                username: 'admin',
+                password: 'admin123',
+                my: 'user',
+                is: 'admin',
+                the: 'admin',
+                admin: 'admin',
+                admin123: 'admin123',
+              },
+              { username: 'indexed', password: 'indexedDbUser' },
+            ],
+            indexes: {
+              // When indexes are defined it can be fetched by indexes as well otherwise only with primary key
+              username: { unique: true, multiEntry: false },
+              something: { unique: false, multiEntry: false },
+            },
+            timestamps: true,
           },
-          { username: 'indexed', password: 'indexedDbUser' },
+          {
+            name: 'info',
+            primaryKey: {
+              name: 'id',
+              autoIncrement: true,
+              unique: true,
+            },
+            initData: [{ info: 'Some info' }],
+            indexes: {
+              userId: { unique: true, multiEntry: false },
+            },
+          },
         ],
-        indexes: {
-          username: { unique: true, multiEntry: false },
-          something: { unique: false, multiEntry: false },
-        },
       });
 
       $('#sign-up').on('submit', function (event) {
         event.preventDefault();
-        let username = $('#username');
-        let password = $('#password');
-        let rePassword = $('#re-password');
+        const username = $('#username');
+        const password = $('#password');
+        const rePassword = $('#re-password');
         $(username).removeClass('is-invalid');
         $(password).removeClass('is-invalid');
         $(rePassword).removeClass('is-invalid');
@@ -134,16 +149,35 @@
           return false;
         }
 
-        db.insert({
-          username: username.val(),
-          password: password.val(),
-        })
+        db.setTable('users')
+          .insert({
+            username: username.val(),
+            password: password.val(),
+          })
           .then(function (data) {
             console.log('Yay, data inserted in ', data);
-            username.val('');
-            password.val('');
-            rePassword.val('');
-            $('#update').trigger('click');
+            // data does not contain automatically incremented pkey value
+            // Infers last selected table =>  not specified
+            db.setTable('users')
+              .selectByIndex('username', username.val())
+              .then((lastInsertedUser) => {
+                console.log('Last inserted user', lastInsertedUser);
+                db.setTable('info')
+                  .insert({
+                    userId: lastInsertedUser.id,
+                    extraInfo: 'Some extra info',
+                  })
+                  .then(function (data) {
+                    console.log('Yay, data inserted in ', { data }, { lastInsertedUser });
+                    username.val('');
+                    password.val('');
+                    rePassword.val('');
+                    $('#update').trigger('click');
+                  })
+                  .catch(function (error) {
+                    console.log('Error: ', error);
+                  });
+              });
           })
           .catch(function (errorText) {
             console.error(errorText);
@@ -154,19 +188,20 @@
       $('#update').click(function () {
         const outputArea = $('.output-area');
         outputArea.html('');
-        db.selectAll()
+        db.setTable('users')
+          .selectAll()
           .then(function (users) {
             if (!users.length) {
               outputArea.html('<p class="text-center">No data</p>');
               return false;
             }
             users.forEach(function (user, index) {
-              const { username, password } = user;
+              const { username, password, id } = user;
               outputArea.html(function () {
                 return (
                   this.innerHTML +
                   `
-              <div class='row mb-1' data-pkey='${username}'>
+              <div class='row mb-1' data-pkey='${id}'>
                 <div class='col col-4'>#<b>${index + 1}</b> ${username}</div>
                 <div class='col col-4 edit-pass border' contenteditable=''>${password}</div>
                 <div class='col col-2'>
@@ -218,7 +253,8 @@
 
       function removeByPkey(pkey) {
         return new Promise(function (resolve, reject) {
-          db.deleteByPk(String(pkey))
+          db.setTable('users')
+            .deleteByPk(pkey)
             .then(function () {
               return resolve(`${pkey} removed from db`);
             })
@@ -230,7 +266,8 @@
 
       function updateByPkey(pkey, data) {
         return new Promise(function (resolve, reject) {
-          db.updateByPk(String(pkey), data)
+          db.setTable('users')
+            .updateByPk(pkey, data)
             .then(function () {
               return resolve(`${pkey} updated`);
             })

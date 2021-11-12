@@ -7,27 +7,32 @@
   <body>
     <h1>Check the console</h1>
     <script>
-      const db = IndexedDB.Model({
+      const db = IndexedDB.Database({
         version: 1,
-        databaseName: 'boo',
-        tableName: 'myNewTable',
-        primaryKey: {
-          name: 'id',
-          autoIncrement: true,
-          unique: true,
-        },
-        initData: [],
-        indexes: {
-          roomId: { unique: false },
-        },
+        name: 'boo',
+        tables: [
+          {
+            name: 'myNewTable',
+            primaryKey: {
+              name: 'id',
+              autoIncrement: true,
+              unique: true,
+            },
+            initData: [],
+            indexes: {
+              roomId: { unique: false },
+            },
+          },
+        ],
       });
 
       // add new record
-      db.insert({
-        roomId: 12,
-        roomName: 'My room name',
-        comment: 'This room is awesome',
-      })
+      db.setTable('myNewTable')
+        .insert({
+          roomId: 12,
+          roomName: 'My room name',
+          comment: 'This room is awesome',
+        })
         .then(function (data) {
           //when done click update button
           console.info('Yay, you have saved the data in ' + data);
@@ -37,9 +42,11 @@
         });
 
       // Get all results from DB
-      db.selectAll().then(function (results) {
-        console.log(...results);
-      });
+      db.setTable('myNewTable')
+        .selectAll()
+        .then(function (results) {
+          console.log(...results);
+        });
     </script>
   </body>
 </html>

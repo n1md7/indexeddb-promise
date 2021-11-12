@@ -1,11 +1,12 @@
 {
   "name": "@n1md7/indexeddb-promise",
-  "version": "5.0.5",
+  "version": "5.0.21",
   "description": "Indexed DB wrapper with promises",
   "main": "./lib/index.js",
   "scripts": {
-    "build": "tsc",
+    "compile": "tsc",
     "minify": "npx browserify ./lib/index.js -o ./dist/indexed-db.min.js --standalone=IndexedDB -t [ babelify --presets [ @babel/preset-env ] ]",
+    "build": "npm run compile && npm run minify",
     "format": "npx prettier --write --ignore-unknown './(src|tests)/**/*.(j|t)s'",
     "test": "npx jest --coverage --ci",
     "prepare": "husky install",

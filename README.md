@@ -1,4 +1,4 @@
-[![npm version](https://badge.fury.io/js/@n1md7%2Findexeddb-promise.svg)](https://badge.fury.io/js/@n1md7%2Findexeddb-promise)
+[![npm databaseVersion](https://badge.fury.io/js/@n1md7%2Findexeddb-promise.svg)](https://badge.fury.io/js/@n1md7%2Findexeddb-promise)
 [![Node.js Package](https://github.com/n1md7/indexeddb-promise/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/n1md7/indexeddb-promise/actions/workflows/npm-publish.yml)
 [![Node.js CI - tests](https://github.com/n1md7/indexeddb-promise/actions/workflows/node.js.yml/badge.svg)](https://github.com/n1md7/indexeddb-promise/actions/workflows/node.js.yml)
 ![GitHub](https://img.shields.io/github/license/n1md7/indexeddb-promise)
@@ -22,9 +22,9 @@ yarn add @n1md7/indexeddb-connection
 or
 
 ```shell script
-<script src="https://bundle.run/@n1md7/indexeddb-connection@2.0.0"></script>
-<script src="https://unpkg.com/@n1md7/indexeddb-connection@2.0.0/src/index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@n1md7/indexeddb-connection@2.0.0/dist/indexed-db.min.js"></script>
+<script src="https://bundle.run/@n1md7/indexeddb-promise@5.0.21"></script>
+<script src="https://unpkg.com/@n1md7/indexeddb-promise@5.0.21/src/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@n1md7/indexeddb-promise@5.0.21/dist/indexed-db.min.js"></script>
 ```
 
 ### Available methods
@@ -32,6 +32,7 @@ or
 - select
 - insert
 - selectAll
+- setTable
 - selectByIndex
 - selectByPk
 - updateByPk
@@ -117,29 +118,34 @@ Once you add _indexed-db.min.js_ in your document then you will be able to acces
 `IndexedDBModel` variable globally which contains `Model`. They can be extracted as following
 
 ```javascript
-const { Model } = IndexedDBModel;
+const { Database } = IndexedDBModel;
 
 // or
-const Model = IndexedDBModel.Model;
+const Database = IndexedDBModel.Database;
 ```
 
 ### Create connector and pass the config
 
 ```javascript
-const db = new IndexedDBModel.Model({
-  version: 1,
+const db = new IndexedDBModel.Database({
+  databaseVersion: 1,
   databaseName: 'myNewDatabase',
-  tableName: 'myNewTable',
-  primaryKey: {
-    name: 'id',
-    autoIncrement: false,
-    unique: true,
-  },
-  initData: [],
-  indexes: {
-    username: { unique: false, autoIncrement: false },
-    password: { unique: false, autoIncrement: false },
-  },
+  tables: [
+    {
+      name: 'myNewTable',
+      primaryKey: {
+        name: 'id',
+        autoIncrement: false,
+        unique: true,
+      },
+      initData: [],
+      indexes: {
+        username: { unique: false, autoIncrement: false },
+        password: { unique: false, autoIncrement: false },
+      },
+      timestamps: true,
+    },
+  ],
 });
 ```
 
@@ -153,30 +159,35 @@ const db = new IndexedDBModel.Model({
   </head>
   <body>
     <script>
-      const db = new IndexedDBModel.Model({
-        version: 1,
+      const db = new IndexedDBModel.Database({
+        databaseVersion: 1,
         databaseName: 'myNewDatabase',
-        tableName: 'myNewTable',
-        primaryKey: {
-          name: 'id',
-          autoIncrement: false,
-          unique: true,
-        },
-        initData: [],
-        indexes: {
-          username: { unique: false, autoIncrement: false },
-          password: { unique: false, autoIncrement: false },
-        },
+        tables: [
+          {
+            name: 'myNewTable',
+            primaryKey: {
+              name: 'id',
+              autoIncrement: false,
+              unique: true,
+            },
+            initData: [],
+            indexes: {
+              username: { unique: false, autoIncrement: false },
+              password: { unique: false, autoIncrement: false },
+            },
+          },
+        ],
       });
 
       // add a new record
-      db.insert({
-        id: Math.random() * 10,
-        username: 'admin',
-        password: 'nimda',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      db.setTable('myNewTable')
+        .insert({
+          id: Math.random() * 10,
+          username: 'admin',
+          password: 'nimda',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
         .then(function () {
           console.info('Yay, you have saved the data.');
         })
@@ -185,17 +196,95 @@ const db = new IndexedDBModel.Model({
         });
 
       // Get all results from the database
-      db.selectAll().then(function (results) {
-        console.log(...results);
-      });
+      db.setTable('myNewTable')
+        .selectAll()
+        .then(function (results) {
+          console.log(...results);
+        });
     </script>
   </body>
 </html>
 ```
 
 ```javascript
-const IndexedDBModel = require('@n1md7/indexeddb-connection');
-const { Model } = IndexedDBModel;
+const IndexedDBModel = require('@n1md7/indexeddb-promise');
+const { Database } = IndexedDBModel;
 // or
-import { Model } from '@n1md7/indexeddb-connection';
+import { Database } from '@n1md7/indexeddb-promise';
+```
+
+Typescript example
+
+```typescript
+import { Database } from '@n1md7/indexeddb-promise';
+
+interface Users {
+  id?: number;
+  username: string;
+  password: string;
+}
+
+enum Priority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+}
+
+interface ToDos {
+  id?: number;
+  userId: number;
+  title: string;
+  description: string;
+  done: boolean;
+  priority: Priority;
+}
+
+const database = new Database<Users | ToDos>({
+  version: 2,
+  name: 'Todo-list',
+  tables: [
+    {
+      name: 'users',
+      primaryKey: {
+        name: 'id',
+        autoIncrement: true,
+        unique: true,
+      },
+      indexes: {
+        username: {
+          unique: false,
+        },
+      },
+      timestamps: true,
+    },
+    {
+      name: 'todos',
+      primaryKey: {
+        name: 'id',
+        autoIncrement: true,
+        unique: true,
+      },
+      indexes: {
+        userId: {
+          unique: true,
+        },
+      },
+      timestamps: true,
+    },
+  ],
+});
+
+(async () => {
+  const user = await database.setTable('users').insert({
+    username: 'admin',
+    password: 'admin',
+  });
+  await database.setTable('todos').insert({
+    userId: user.id,
+    title: 'Todo 1',
+    description: 'Description 1',
+    done: false,
+    priority: Priority.LOW,
+  });
+})();
 ```
