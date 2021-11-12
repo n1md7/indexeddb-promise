@@ -14,9 +14,9 @@
 ## Installation
 
 ```shell script
-npm install @n1md7/indexeddb-connection --save
+npm install @n1md7/indexeddb-promise --save
 # or
-yarn add @n1md7/indexeddb-connection
+yarn add @n1md7/indexeddb-promise
 ```
 
 or
@@ -40,15 +40,15 @@ or
 
 ### .selectAll(): Promise
 
-Gets all the data from db and returns connection with response data
+Gets all the data from db and returns promise with response data
 
 ### .selectByIndex(indexName: string, valueToMatch: string): Promise
 
-Gets data from the db and returns connection with response data
+Gets data from the db and returns promise with response data
 
 ### .selectByPk(pKey: string): Promise
 
-Has one parameter `pkey` as primaryKey and returns connection with data
+Has one parameter `pkey` as primaryKey and returns promise with data
 
 ### .select({...}): Promise
 
