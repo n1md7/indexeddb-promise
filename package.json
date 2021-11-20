@@ -15,6 +15,15 @@
   "author": "Harry Kodua",
   "license": "MIT",
   "types": "./lib",
+  "files": [
+    "lib",
+    "dist",
+    "src",
+    "tests",
+    "examples",
+    "package.json",
+    "README.md"
+  ],
   "keywords": [
     "db",
     "indexed-db",
