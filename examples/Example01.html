@@ -7,7 +7,7 @@
   <body>
     <h1>Check the console</h1>
     <script>
-      const db = IndexedDB.Database({
+      const db = new IndexedDB.Database({
         version: 1,
         name: 'boo',
         tables: [
