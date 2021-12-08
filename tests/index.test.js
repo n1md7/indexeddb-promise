@@ -343,34 +343,6 @@ describe('IndexedDB', () => {
     expect(db.config).toEqual(config);
   });
 
-  it('should throw Either include primary key as well or set {autoincrement: true}.', async () => {
-    const db = new Database({
-      version: 1,
-      name: `Test-db-0${ref.i}`,
-      tables: [
-        {
-          name: 'users',
-          primaryKey: {
-            name: 'username',
-            autoIncrement: false,
-            unique: false,
-          },
-          initData: [
-            { password: 'passwd' }, //missing username and it should throw
-          ],
-          indexes: {},
-        },
-      ],
-    });
-
-    try {
-      const users = db.useModel('users');
-      await users.insert({ password: 'passwd' });
-    } catch (e) {
-      expect(e.message).toEqual('Either include primary key as well or set {autoincrement: true}.');
-    }
-  });
-
   it('should throw Unsupported environment', () => {
     jest.spyOn(window.indexedDB, 'open').mockImplementation(() => {
       throw new Error('Unsupported environment');
