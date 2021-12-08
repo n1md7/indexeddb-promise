@@ -9,7 +9,6 @@ describe('IndexedDB', () => {
   });
   afterEach(async () => {
     jest.clearAllTimers();
-    await Database.removeDatabase(`Test-db-0${ref.i}`);
   });
 
   it('should be defined', () => {
@@ -19,7 +18,7 @@ describe('IndexedDB', () => {
   it('should create store and verify methods', () => {
     const db = new Database({
       version: 1,
-      databaseName: `Test-db-0${ref.i}`,
+      name: `Test-db-0${ref.i}`,
       tables: [
         {
           name: 'users',
@@ -39,13 +38,13 @@ describe('IndexedDB', () => {
         },
       ],
     });
-    expect(db.insert).toBeDefined();
-    expect(db.selectAll).toBeDefined();
-    expect(db.selectByPk).toBeDefined();
-    expect(db.select).toBeDefined();
-    expect(db.setTable).toBeDefined();
-    expect(db.deleteByPk).toBeDefined();
-    expect(db.updateByPk).toBeDefined();
+    const table = db.useModel('users');
+    expect(table.insert).toBeDefined();
+    expect(table.selectAll).toBeDefined();
+    expect(table.selectByPk).toBeDefined();
+    expect(table.select).toBeDefined();
+    expect(table.deleteByPk).toBeDefined();
+    expect(table.updateByPk).toBeDefined();
   });
 
   it('should insert and verify data', (done) => {
@@ -55,7 +54,7 @@ describe('IndexedDB', () => {
     ];
     const db = new Database({
       version: 1,
-      databaseName: `Test-db-0${ref.i}`,
+      name: `Test-db-0${ref.i}`,
       tables: [
         {
           name: 'users',
@@ -73,10 +72,10 @@ describe('IndexedDB', () => {
       ],
     });
     const data = { username: 'michael', password: 'passwd' };
-    db.setTable('users');
-    db.insert(data).then((inserted) => {
+    const table = db.useModel('users');
+    table.insert(data).then((inserted) => {
       expect(inserted).toEqual(data);
-      db.selectAll().then((all) => {
+      table.selectAll().then((all) => {
         expect(all).toEqual(expect.arrayContaining(initData.concat(data)));
         done();
       });
@@ -86,7 +85,7 @@ describe('IndexedDB', () => {
   it('should verify .selectByPk', (done) => {
     const db = new Database({
       version: 1,
-      databaseName: `Test-db-0${ref.i}`,
+      name: `Test-db-0${ref.i}`,
       tables: [
         {
           name: 'users',
@@ -106,8 +105,8 @@ describe('IndexedDB', () => {
         },
       ],
     });
-    db.setTable('users');
-    db.selectByPk('admin').then((selected) => {
+    const model = db.useModel('users');
+    model.selectByPk('admin').then((selected) => {
       expect(selected).toEqual({ username: 'admin', password: 'admin123' });
       done();
     });
@@ -116,7 +115,7 @@ describe('IndexedDB', () => {
   it('should verify .selectAll', async () => {
     const db = new Database({
       version: 1,
-      databaseName: `Test-db-0${ref.i}`,
+      name: `Test-db-0${ref.i}`,
       tables: [
         {
           name: 'users',
@@ -136,14 +135,14 @@ describe('IndexedDB', () => {
         },
       ],
     });
-    const _data = await db.setTable('users').selectAll();
+    const _data = await db.useModel('users').selectAll();
     expect(_data).not.toBeNull();
   });
 
   it('should verify .selectByIndex', () => {
     const db = new Database({
       version: 1,
-      databaseName: `Test-db-0${ref.i}`,
+      name: `Test-db-0${ref.i}`,
       tables: [
         {
           name: 'users',
@@ -163,8 +162,8 @@ describe('IndexedDB', () => {
         },
       ],
     });
-    db.setTable('users');
-    db.selectByIndex('username', 'admin').then((data) => {
+    const model = db.useModel('users');
+    model.selectByIndex('username', 'admin').then((data) => {
       expect(data).toEqual({ username: 'admin', password: 'admin123' });
     });
   });
@@ -172,7 +171,7 @@ describe('IndexedDB', () => {
   it('should verify .select', async () => {
     const db = new Database({
       version: 1,
-      databaseName: `Test-db-0${ref.i}`,
+      name: `Test-db-0${ref.i}`,
       tables: [
         {
           name: 'users',
@@ -192,23 +191,23 @@ describe('IndexedDB', () => {
         },
       ],
     });
-    db.setTable('users');
+    const model = db.useModel('users');
     expect(
-      await db.select({
+      await model.select({
         where: {
           password: 'admin123',
         },
       }),
     ).toEqual([{ username: 'admin', password: 'admin123' }]);
     expect(
-      await db.select({
+      await model.select({
         where: {
           username: 'admin',
         },
       }),
     ).toEqual([{ username: 'admin', password: 'admin123' }]);
     expect(
-      await db.select({
+      await model.select({
         where: {
           username: 'admin',
           password: 'admin123',
@@ -216,7 +215,7 @@ describe('IndexedDB', () => {
       }),
     ).toEqual([{ username: 'admin', password: 'admin123' }]);
     expect(
-      await db.select({
+      await model.select({
         where: (data) => data,
       }),
     ).toEqual(
@@ -226,7 +225,7 @@ describe('IndexedDB', () => {
       ]),
     );
     expect(
-      await db.select({
+      await model.select({
         where: (data) => data,
         sortBy: 'username',
       }),
@@ -237,14 +236,14 @@ describe('IndexedDB', () => {
       ]),
     );
     expect(
-      await db.select({
+      await model.select({
         where: (data) => data,
         sortBy: 'username',
         limit: 1,
       }),
     ).toEqual(expect.arrayContaining([{ username: 'admin', password: 'admin123' }]));
     expect(
-      await db.select({
+      await model.select({
         where: (data) => data,
         sortBy: 'username',
         limit: 1,
@@ -256,7 +255,7 @@ describe('IndexedDB', () => {
   it('should verify .updateByPk', async () => {
     const db = new Database({
       version: 1,
-      databaseName: `Test-db-0${ref.i}`,
+      name: `Test-db-0${ref.i}`,
       tables: [
         {
           name: 'users',
@@ -276,11 +275,12 @@ describe('IndexedDB', () => {
         },
       ],
     });
-    const update = await db.setTable('users').updateByPk('admin', {
+    const model = db.useModel('users');
+    const update = await model.updateByPk('admin', {
       password: 'strongerPassword',
     });
     expect(update).toEqual({ username: 'admin', password: 'strongerPassword' });
-    expect(await db.selectByPk('admin')).toEqual({
+    expect(await model.selectByPk('admin')).toEqual({
       password: 'strongerPassword',
       username: 'admin',
     });
@@ -289,7 +289,7 @@ describe('IndexedDB', () => {
   it('should verify .deleteByPk', async () => {
     const db = new Database({
       version: 1,
-      databaseName: `Test-db-0${ref.i}`,
+      name: `Test-db-0${ref.i}`,
       tables: [
         {
           name: 'users',
@@ -309,15 +309,16 @@ describe('IndexedDB', () => {
         },
       ],
     });
-    const deleted = await db.setTable('users').deleteByPk('admin');
+    const model = db.useModel('users');
+    const deleted = await model.deleteByPk('admin');
     expect(deleted).toEqual('admin');
-    expect(await db.selectByPk('admin')).toBeUndefined();
+    expect(await model.selectByPk('admin')).toBeUndefined();
   });
 
   it('should verify config', () => {
     const config = {
       version: 1,
-      databaseName: `Test-db-0${ref.i}`,
+      name: `Test-db-0${ref.i}`,
       tables: [
         {
           name: 'users',
@@ -334,18 +335,18 @@ describe('IndexedDB', () => {
             username: { unique: true, multiEntry: false },
             password: { unique: false, multiEntry: false },
           },
+          timestamps: false,
         },
       ],
     };
     const db = new Database(config);
-    db.setTable('users');
     expect(db.config).toEqual(config);
   });
 
   it('should throw Either include primary key as well or set {autoincrement: true}.', async () => {
-    const users = new Database({
+    const db = new Database({
       version: 1,
-      databaseName: `Test-db-0${ref.i}`,
+      name: `Test-db-0${ref.i}`,
       tables: [
         {
           name: 'users',
@@ -363,10 +364,10 @@ describe('IndexedDB', () => {
     });
 
     try {
-      users.setTable('users');
+      const users = db.useModel('users');
       await users.insert({ password: 'passwd' });
     } catch (e) {
-      expect(e).toEqual('Either include primary key as well or set {autoincrement: true}.');
+      expect(e.message).toEqual('Either include primary key as well or set {autoincrement: true}.');
     }
   });
 
@@ -377,7 +378,7 @@ describe('IndexedDB', () => {
 
     new Database({
       version: 1,
-      databaseName: `Test-db-0${ref.i}`,
+      name: `Test-db-0${ref.i}`,
       tables: [
         {
           name: 'users',

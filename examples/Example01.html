@@ -7,8 +7,8 @@
   <body>
     <h1>Check the console</h1>
     <script>
-      const db = IndexedDB.Database({
-        version: 1,
+      const db = new IndexedDB.Database({
+        version: 2,
         name: 'boo',
         tables: [
           {
@@ -27,26 +27,25 @@
       });
 
       // add new record
-      db.setTable('myNewTable')
+      const model = db.useModel('myNewTable');
+
+      model
         .insert({
-          roomId: 12,
+          roomId: 16,
           roomName: 'My room name',
           comment: 'This room is awesome',
         })
         .then(function (data) {
-          //when done click update button
-          console.info('Yay, you have saved the data in ' + data);
+          console.info('Yay. data has been saved!', { data });
         })
         .catch(function (error) {
           console.error(error);
         });
 
       // Get all results from DB
-      db.setTable('myNewTable')
-        .selectAll()
-        .then(function (results) {
-          console.log(...results);
-        });
+      model.selectAll().then(function (results) {
+        console.log(...results);
+      });
     </script>
   </body>
 </html>

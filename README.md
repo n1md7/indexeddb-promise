@@ -32,6 +32,7 @@ or
 - select
 - insert
 - selectAll
+- openCursor
 - setTable
 - selectByIndex
 - selectByPk
@@ -180,7 +181,8 @@ const db = new IndexedDBModel.Database({
       });
 
       // add a new record
-      db.setTable('myNewTable')
+      const model = db.useModel('myNewTable');
+      model
         .insert({
           id: Math.random() * 10,
           username: 'admin',
@@ -196,11 +198,9 @@ const db = new IndexedDBModel.Database({
         });
 
       // Get all results from the database
-      db.setTable('myNewTable')
-        .selectAll()
-        .then(function (results) {
-          console.log(...results);
-        });
+      model.selectAll().then(function (results) {
+        console.log(...results);
+      });
     </script>
   </body>
 </html>
@@ -239,8 +239,8 @@ interface ToDos {
   priority: Priority;
 }
 
-const database = new Database<Users | ToDos>({
-  version: 2,
+const database = new Database({
+  version: 1,
   name: 'Todo-list',
   tables: [
     {
@@ -275,11 +275,13 @@ const database = new Database<Users | ToDos>({
 });
 
 (async () => {
-  const user = await database.setTable('users').insert({
+  const users = database.useModel<Users>('users');
+  await users.insert({
     username: 'admin',
     password: 'admin',
   });
-  await database.setTable('todos').insert({
+  const todos = database.useModel<ToDos>('todos');
+  await todos.insert({
     userId: user.id,
     title: 'Todo 1',
     description: 'Description 1',
