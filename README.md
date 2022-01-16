@@ -19,21 +19,12 @@ npm install @n1md7/indexeddb-promise --save
 yarn add @n1md7/indexeddb-promise
 ```
 
-or
-
-```shell script
-<script src="https://bundle.run/@n1md7/indexeddb-promise@5.0.21"></script>
-<script src="https://unpkg.com/@n1md7/indexeddb-promise@5.0.21/src/index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@n1md7/indexeddb-promise@5.0.21/dist/indexed-db.min.js"></script>
-```
-
 ### Available methods
 
 - select
 - insert
 - selectAll
 - openCursor
-- setTable
 - selectByIndex
 - selectByPk
 - updateByPk
@@ -116,19 +107,19 @@ _note_ primary key is type sensitive. If it is saved as integer then should pass
 ```
 
 Once you add _indexed-db.min.js_ in your document then you will be able to access
-`IndexedDBModel` variable globally which contains `Model`. They can be extracted as following
+`IndexedDB` variable globally which contains `Model`. They can be extracted as following
 
 ```javascript
-const { Database } = IndexedDBModel;
+const { Database } = IndexedDB;
 
 // or
-const Database = IndexedDBModel.Database;
+const Database = IndexedDB.Database;
 ```
 
 ### Create connector and pass the config
 
 ```javascript
-const db = new IndexedDBModel.Database({
+const db = new IndexedDB.Database({
   databaseVersion: 1,
   databaseName: 'myNewDatabase',
   tables: [
@@ -160,7 +151,7 @@ const db = new IndexedDBModel.Database({
   </head>
   <body>
     <script>
-      const db = new IndexedDBModel.Database({
+      const db = new IndexedDB.Database({
         databaseVersion: 1,
         databaseName: 'myNewDatabase',
         tables: [
@@ -207,13 +198,13 @@ const db = new IndexedDBModel.Database({
 ```
 
 ```javascript
-const IndexedDBModel = require('@n1md7/indexeddb-promise');
-const { Database } = IndexedDBModel;
+const IndexedDB = require('@n1md7/indexeddb-promise');
+const { Database } = IndexedDB;
 // or
 import { Database } from '@n1md7/indexeddb-promise';
 ```
 
-Typescript example
+TypeScript example
 
 ```typescript
 import { Database } from '@n1md7/indexeddb-promise';
@@ -276,7 +267,7 @@ const database = new Database({
 
 (async () => {
   const users = database.useModel<Users>('users');
-  await users.insert({
+  const user = await users.insert({
     username: 'admin',
     password: 'admin',
   });
@@ -287,6 +278,51 @@ const database = new Database({
     description: 'Description 1',
     done: false,
     priority: Priority.LOW,
+  });
+})();
+```
+
+```typescript
+import { Table, PrimaryKey, Indexed, Database } from '@n1md7/indexeddb-promise';
+
+@Table({ name: '__Name__', timestamps: true })
+class SomeTable {
+  @PrimaryKey({ autoIncrement: true, unique: true })
+  id: number;
+
+  @Indexed({ unique: true, multiEntry: false })
+  username: string;
+
+  @Indexed({ unique: false })
+  age: number;
+
+  otherData: string;
+}
+
+const anotherDb = new Database({
+  version: 1,
+  name: 'Other-DB',
+  tables: [SomeTable],
+});
+
+const model = anotherDb.useModel(SomeTable);
+
+(async () => {
+  await model
+    .insert({
+      username: 'John',
+      age: 20,
+      otherData: 'Some data',
+    })
+    .catch((error) => console.error(error));
+
+  model.selectAll().then((results) => {
+    if (results) {
+      results.forEach((result) => {
+        // result is inferred to be SomeTable
+        console.log(result.username);
+      });
+    }
   });
 })();
 ```
