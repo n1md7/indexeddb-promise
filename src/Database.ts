@@ -4,19 +4,61 @@ import Model from './Model';
 import Joi from 'joi';
 import { ConfigSchema } from './schema';
 import IDBError from './IDBError';
+import { getClassMetadata, getPropertyMetadata } from './Decorators';
 
 export class Database {
+  private readonly __connection: Promise<IDBDatabase>;
   protected readonly databaseName: string = 'DefaultDatabase';
   protected readonly tables: string[] = ['DefaultTable'];
   protected readonly databaseVersion: number = 1;
-  protected readonly connection: Promise<IDBDatabase>;
 
-  constructor(protected readonly config: ConfigType) {
+  constructor(protected readonly config: ConfigType | ConfigType<Function>) {
     if (Array.isArray(config)) {
       throw new IDBError(IDBError.compose('Config has to be an Object'));
     }
 
-    const validated: Joi.ValidationResult = ConfigSchema.validate(config);
+    if (!Array.isArray(config.tables)) {
+      throw new IDBError(IDBError.compose('Config.tables has to be an Array'));
+    }
+
+    const hasMetadata = (config as ConfigType<Function>).tables.every((table) => typeof table === 'function');
+    const hasPlainConfig = (config as ConfigType).tables.every((table) => typeof table === 'object');
+    if (!hasMetadata && !hasPlainConfig) {
+      throw new IDBError(IDBError.compose('Config.tables has to be an Array of Objects or Annotated Classes'));
+    }
+
+    if (hasMetadata) {
+      // Serialize to plain config
+      (config as ConfigType).tables = (config as ConfigType<Function>).tables.map((target: Function) => {
+        const classMeta = getClassMetadata(target);
+        const propertyMeta = getPropertyMetadata(target);
+        const composeConfig: TableType = {
+          name: classMeta.name,
+          timestamps: classMeta.timestamps,
+          primaryKey: {},
+          indexes: {},
+        } as TableType;
+        const propertyEntries = Object.entries(propertyMeta);
+        propertyEntries.forEach(([propertyName, value]) => {
+          if (value.primaryKey)
+            composeConfig.primaryKey = {
+              name: propertyName,
+              autoIncrement: value.primaryKey.autoIncrement,
+              unique: value.primaryKey.unique,
+            };
+          if (value.indexed)
+            composeConfig.indexes[propertyName] = {
+              multiEntry: value.indexed.multiEntry,
+              unique: value.indexed.unique,
+            };
+        });
+
+        return composeConfig;
+      });
+    }
+    // else it's already plain config
+    // Validate plain config
+    const validated: Joi.ValidationResult<ConfigType> = ConfigSchema.validate(config as ConfigType);
     if (validated.error) {
       throw new IDBError(validated.error.details);
     }
@@ -25,38 +67,44 @@ export class Database {
     this.databaseName = this.config.name;
     this.databaseVersion = this.config.version;
 
-    this.connection = new Promise((resolve, reject) => {
+    this.__connection = new Promise((resolve, reject) => {
       if (!window || !('indexedDB' in window) || !('open' in window.indexedDB)) {
         return reject('Unsupported environment');
       }
 
       const request = window.indexedDB.open(this.databaseName, this.databaseVersion);
       request.onerror = () => reject(request.error);
-      request.onsuccess = function () {
-        const connection = request.result;
-        connection.onversionchange = function () {
-          console.info('Database version changed');
-          console.info('Connection closed.');
-          connection.close();
+      request.onsuccess = () => {
+        const __connection = request.result;
+        __connection.onversionchange = () => {
+          console.info(`[${this.databaseName}]: Database version changed.`);
+          console.info(`[${this.databaseName}]: Connection closed.`);
+          __connection.close();
         };
 
-        return resolve(connection);
+        return resolve(__connection);
       };
 
-      request.onblocked = function () {
+      request.onblocked = () => {
         request.result.close();
-        console.error(request.error || 'Database blocked');
+        console.error(`[${this.databaseName}]: ${request.error || 'Database blocked'}`);
       };
 
-      request.onupgradeneeded = (event) => Database.onUpgradeNeeded(request.result, this.config, event.oldVersion);
+      request.onupgradeneeded = (event) =>
+        Database.onUpgradeNeeded(request.result, this.config as ConfigType, event.oldVersion);
     });
+  }
+
+  public get connection() {
+    return this.__connection;
   }
 
   /**
    * @description This method is used to get the indexes of the table, verify and return it.
    */
   public static verify<T>(data: T, tables: TableType[]): T {
-    if (!tables.length) {
+    const [tableIsNull = null] = tables;
+    if (tableIsNull === null) {
       throw new Error('Tables should not be empty/undefined');
     }
     const keys = Object.keys(data);
@@ -67,14 +115,15 @@ export class Database {
         }
       }
     });
+
     return data;
   }
 
   public static async removeDatabase(name: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const request = window.indexedDB.deleteDatabase(name);
-      request.onblocked = function () {
-        console.log("Couldn't delete database due to the operation being blocked");
+      request.onblocked = () => {
+        console.log(`[${name}]: Couldn't delete database due to the operation being blocked`);
       };
       request.onsuccess = () => resolve('Database has been removed');
       request.onerror = () => reject(request.error || "Couldn't remove database");
@@ -85,7 +134,7 @@ export class Database {
     for await (const table of database.tables) {
       if ((oldVersion < database.version && oldVersion) || db.objectStoreNames.contains(table.name)) {
         db.deleteObjectStore(table.name);
-        console.info(`DB version changed, removing table: ${table.name} for the fresh start`);
+        console.info(`[${database.name}]: DB version changed, removing table: ${table.name} for the fresh start`);
       }
       const store = db.createObjectStore(table.name, {
         keyPath: table.primaryKey?.name || 'id',
@@ -120,12 +169,23 @@ export class Database {
     }
   }
 
-  public useModel<CollectionType extends Optional<TimeStampsType>>(tableName: string) {
-    if (!this.tables.includes(tableName)) {
-      throw new Error(`Table [${tableName}] does not exist`);
-    }
-    const table = this.config.tables.find(({ name }) => name === tableName);
+  public useModel<CollectionType>(target: new () => CollectionType): Model<CollectionType & Optional<TimeStampsType>>;
+  public useModel<CollectionType>(tableName: string): Model<CollectionType & Optional<TimeStampsType>>;
+  public useModel<CollectionType>(target: string | ((new () => CollectionType) & Optional<TimeStampsType>)) {
+    const tableName = { value: '' };
+    if (typeof target === 'string') tableName.value = target;
+    if (typeof target === 'function') tableName.value = getClassMetadata(target).name;
+    if (!tableName.value) throw new Error('Invalid tableName or tableClass.');
 
-    return new Model<CollectionType>(this.connection, table);
+    if (!this.tables.includes(tableName.value)) {
+      throw new Error(`[${this.databaseName}]: Table [${tableName.value}] does not exist.`);
+    }
+
+    const table = (this.config as ConfigType).tables.find(({ name }) => name === tableName.value);
+
+    if (typeof target === 'string')
+      return new Model<CollectionType & Optional<TimeStampsType>>(this.__connection, table);
+
+    return new Model(this.__connection, table);
   }
 }

@@ -1,7 +1,7 @@
-export type ConfigType = {
+export type ConfigType<T = TableType> = {
   version: number;
   name: string;
-  tables: TableType[];
+  tables: T[];
 };
 export type TimeStampsType = {
   createdAt: number;
