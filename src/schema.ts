@@ -50,7 +50,7 @@ export const ConfigSchema = Joi.object({
                   'If true, the index will add an entry in the index for each array element when the keyPath' +
                     ' resolves to an Array. If false, it will add one single entry containing the Array.',
                 ),
-            }),
+            }).default({ unique: false, multiEntry: true }),
           )
           .optional()
           .default({})
