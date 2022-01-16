@@ -17,7 +17,7 @@ export class Database {
       throw new IDBError(IDBError.compose('Config has to be an Object'));
     }
 
-    if (!Array.isArray(config.tables)) {
+    if (!Array.isArray(config?.tables)) {
       throw new IDBError(IDBError.compose('Config.tables has to be an Array'));
     }
 
@@ -58,7 +58,10 @@ export class Database {
     }
     // else it's already plain config
     // Validate plain config
-    const validated: Joi.ValidationResult<ConfigType> = ConfigSchema.validate(config as ConfigType);
+    const validated: Joi.ValidationResult<ConfigType> = ConfigSchema.validate(config as ConfigType, {
+      abortEarly: true,
+      allowUnknown: false,
+    });
     if (validated.error) {
       throw new IDBError(validated.error.details);
     }
@@ -93,6 +96,10 @@ export class Database {
       request.onupgradeneeded = (event) =>
         Database.onUpgradeNeeded(request.result, this.config as ConfigType, event.oldVersion);
     });
+  }
+
+  public get configuration() {
+    return this.config;
   }
 
   public get connection() {

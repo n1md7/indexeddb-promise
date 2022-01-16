@@ -16,26 +16,35 @@ export const ConfigSchema = Joi.object({
       Joi.object({
         name: Joi.string().required().label('Table name').example('MyTable'),
         primaryKey: Joi.object({
-          name: Joi.string().required().label('Primary key name').example('id'),
+          name: Joi.string().optional().label('Primary key name').default('id').example('id'),
           autoIncrement: Joi.boolean()
-            .required()
+            .optional()
             .label('Auto increment')
+            .default(true)
             .example(true)
             .description('If true, the object store has a key generator.'),
-          unique: Joi.boolean().required().label('Unique').example(true),
-        }),
+          unique: Joi.boolean().optional().default(true).label('Unique').example(true),
+        })
+          .optional()
+          .default({
+            name: 'id',
+            autoIncrement: true,
+            unique: true,
+          }),
         indexes: Joi.object()
           .pattern(
             /./,
             Joi.object({
               unique: Joi.boolean()
-                .required()
+                .optional()
+                .default(false)
                 .label('Unique')
                 .example(true)
                 .description('If true, the index will not allow duplicate values for a single key.'),
               multiEntry: Joi.boolean()
-                .required()
+                .optional()
                 .label('Multi entry')
+                .default(true)
                 .example(true)
                 .description(
                   'If true, the index will add an entry in the index for each array element when the keyPath' +
@@ -43,8 +52,9 @@ export const ConfigSchema = Joi.object({
                 ),
             }),
           )
-          .required()
-          .example([{ name: 'index', unique: true, multiEntry: true }])
+          .optional()
+          .default({})
+          .example({ username: { unique: true, multiEntry: false }, password: { unique: false, multiEntry: false } })
           .label('Indexes')
           .description('It creates a new field/column defining a new data point for each database record to contain.'),
         timestamps: Joi.boolean()
@@ -56,6 +66,7 @@ export const ConfigSchema = Joi.object({
         initData: Joi.array()
           .items(Joi.object())
           .optional()
+          .default([])
           .label('Initial data')
           .example([{ name: 'John', age: 30 }])
           .description(
