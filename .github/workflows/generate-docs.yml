@@ -29,12 +29,15 @@ jobs:
         run: cp -r dist/* docs/
       - name: Copy examples to docs folder
         run: cp -r examples/* docs/
+      - name: Create public folder
+        run: mkdir -p public
+      - name: Copy docs folder to public folder
+        run: cp -r docs/* public/
       - name: Init new repo in docs folder and commit generated files to it
         run: |
-          cd docs
+          cd public
           git init
           git add -A
-          git config --global --add safe.directory /github/workspace/docs
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git commit -m 'deploy docs'
@@ -44,4 +47,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           force: true
-          directory: ./docs
+          directory: ./public
