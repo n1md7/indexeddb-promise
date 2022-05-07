@@ -35,9 +35,6 @@ jobs:
         run: cp -r docs/* public/
       - name: Init new repo in docs folder and commit generated files to it
         run: |
-          pwd
-          echo $HOME
-          git config --global --add safe.directory /home/runner/work/indexeddb-promise/indexeddb-promise/public/
           cd public
           git config --global init.defaultBranch master
           git init
@@ -46,9 +43,9 @@ jobs:
           git config --local user.name "GitHub Action"
           git commit -m 'deploy docs'
       - name: Force push to destination branch
-        uses: ad-m/github-push-action@v0.5.0
+        uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           force: true
-          directory: /home/runner/work/indexeddb-promise/indexeddb-promise/public/
+          directory: public
