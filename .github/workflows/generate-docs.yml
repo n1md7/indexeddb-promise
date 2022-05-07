@@ -35,9 +35,9 @@ jobs:
         run: cp -r docs/* public/
       - name: Init new repo in docs folder and commit generated files to it
         run: |
-          ls -la
-          ls -la public
-          git config --global --add safe.directory /github/workspace/public
+          pwd
+          echo $HOME
+          git config --global --add safe.directory /home/runner/work/indexeddb-promise/indexeddb-promise/public/
           cd public
           git config --global init.defaultBranch master
           git init
@@ -51,4 +51,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           force: true
-          directory: ./public
+          directory: /home/runner/work/indexeddb-promise/indexeddb-promise/public/
