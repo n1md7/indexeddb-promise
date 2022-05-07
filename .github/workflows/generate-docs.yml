@@ -1,0 +1,46 @@
+name: Generate Docs
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build package
+        run: npm run build
+      - name: Copy package to docs folder
+        run: cp -r dist/* docs/
+      - name: Copy examples to docs folder
+        run: cp -r examples/* docs/
+      - name: Init new repo in docs folder and commit generated files to it
+        run: |
+          cd docs
+          git init
+          git add -A
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m 'deploy docs'
+      - name: Force push to destination branch
+        uses: ad-m/github-push-action@v0.5.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          force: true
+          directory: ./docs
