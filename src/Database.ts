@@ -7,7 +7,7 @@ import IDBError from './IDBError';
 import { getClassMetadata, getPropertyMetadata } from './Decorators';
 
 export class Database {
-  private readonly __connection: Promise<IDBDatabase>;
+  private __connection: IDBDatabase = null;
   protected readonly databaseName: string = 'DefaultDatabase';
   protected readonly tables: string[] = ['DefaultTable'];
   protected readonly databaseVersion: number = 1;
@@ -35,6 +35,7 @@ export class Database {
         const composeConfig: TableType = {
           name: classMeta.name,
           timestamps: classMeta.timestamps,
+          initData: classMeta.initialData,
           primaryKey: {},
           indexes: {},
         } as TableType;
@@ -69,8 +70,10 @@ export class Database {
     this.tables = this.config.tables?.map((table) => table.name);
     this.databaseName = this.config.name;
     this.databaseVersion = this.config.version;
+  }
 
-    this.__connection = new Promise((resolve, reject) => {
+  public connect(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
       if (!window || !('indexedDB' in window) || !('open' in window.indexedDB)) {
         return reject('Unsupported environment');
       }
@@ -78,14 +81,14 @@ export class Database {
       const request = window.indexedDB.open(this.databaseName, this.databaseVersion);
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
-        const __connection = request.result;
-        __connection.onversionchange = () => {
+        this.__connection = request.result;
+        this.__connection.onversionchange = () => {
           console.info(`[${this.databaseName}]: Database version changed.`);
           console.info(`[${this.databaseName}]: Connection closed.`);
-          __connection.close();
+          this.__connection.close();
         };
 
-        return resolve(__connection);
+        return resolve(this.__connection);
       };
 
       request.onblocked = () => {
@@ -179,6 +182,8 @@ export class Database {
   public useModel<CollectionType>(target: new () => CollectionType): Model<CollectionType & Optional<TimeStampsType>>;
   public useModel<CollectionType>(tableName: string): Model<CollectionType & Optional<TimeStampsType>>;
   public useModel<CollectionType>(target: string | ((new () => CollectionType) & Optional<TimeStampsType>)) {
+    if (this.connection === null) throw new Error('Database is not connected. Did you call .connect()?');
+
     const tableName = { value: '' };
     if (typeof target === 'string') tableName.value = target;
     if (typeof target === 'function') tableName.value = getClassMetadata(target).name;
@@ -190,9 +195,10 @@ export class Database {
 
     const table = (this.config as ConfigType).tables.find(({ name }) => name === tableName.value);
 
-    if (typeof target === 'string')
-      return new Model<CollectionType & Optional<TimeStampsType>>(this.__connection, table);
+    if (typeof target === 'string') {
+      return new Model<CollectionType & Optional<TimeStampsType>>(this.connection, table);
+    }
 
-    return new Model(this.__connection, table);
+    return new Model(this.connection, table, target);
   }
 }

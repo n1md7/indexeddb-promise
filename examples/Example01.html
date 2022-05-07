@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <title>IndexedDB app</title>
-    <script src="../dist/indexed-db.min.js"></script>
+    <script src="indexed-db.min.js"></script>
   </head>
   <body>
     <h1>Check the console</h1>
@@ -26,26 +26,30 @@
         ],
       });
 
-      // add new record
-      const model = db.useModel('myNewTable');
+      db.connect()
+        .then(() => {
+          // add new record
+          const model = db.useModel('myNewTable');
 
-      model
-        .insert({
-          roomId: 16,
-          roomName: 'My room name',
-          comment: 'This room is awesome',
-        })
-        .then(function (data) {
-          console.info('Yay. data has been saved!', { data });
-        })
-        .catch(function (error) {
-          console.error(error);
-        });
+          model
+            .insert({
+              roomId: 16,
+              roomName: 'My room name',
+              comment: 'This room is awesome',
+            })
+            .then(function (data) {
+              console.info('Yay. data has been saved!', { data });
+            })
+            .catch(function (error) {
+              console.error(error);
+            });
 
-      // Get all results from DB
-      model.selectAll().then(function (results) {
-        console.log(...results);
-      });
+          // Get all results from DB
+          model.selectAll().then(function (results) {
+            console.log(...results);
+          });
+        })
+        .catch(console.error);
     </script>
   </body>
 </html>

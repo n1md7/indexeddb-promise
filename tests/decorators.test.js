@@ -1,36 +1,45 @@
-import { Table, Indexed, Database, PrimaryKey, getClassMetadata, getPropertyMetadata } from '../src';
+import { getClassMetadata, getPrimaryKey, getPropertyMetadata, Indexed, PrimaryKey, Table } from '../src';
 
 test('[@Table] decorator metadata with defaults', () => {
   function Test() {}
+
   Table()(Test);
   // or it can be class but for property metadata it has to be an instance
   // Table()(Test); Indexed()(new Test, 'prop-name');
   expect(getClassMetadata(Test)).toEqual({
     name: 'Test',
+    initialData: [],
     timestamps: false,
   });
 });
 
 test('[@Table] decorator metadata with partially default values', () => {
   Table({ name: 'My-Name' })(Test);
+
   function Test() {}
+
   expect(getClassMetadata(Test)).toEqual({
     name: 'My-Name',
+    initialData: [],
     timestamps: false,
   });
 });
 
 test('[@Table] decorator metadata with custom values', () => {
   Table({ name: 'My-Name', timestamps: true })(Test);
+
   function Test() {}
+
   expect(getClassMetadata(Test)).toEqual({
     name: 'My-Name',
+    initialData: [],
     timestamps: true,
   });
 });
 
 test('[@Indexed] decorator metadata with defaults', () => {
   class Test {}
+
   const propertyName = 'propertyName';
   Indexed()(new Test(), propertyName);
   expect(getPropertyMetadata(Test)).toEqual({
@@ -45,6 +54,7 @@ test('[@Indexed] decorator metadata with defaults', () => {
 
 test('[@Indexed] decorator metadata with partially default values', () => {
   class Test {}
+
   const propertyName = 'propertyName';
   Indexed({ unique: true })(new Test(), propertyName);
   expect(getPropertyMetadata(Test)).toEqual({
@@ -59,6 +69,7 @@ test('[@Indexed] decorator metadata with partially default values', () => {
 
 test('[@Indexed] decorator metadata with custom values', () => {
   class Test {}
+
   const propertyName = 'propertyName';
   Indexed({ unique: true, multiEntry: false })(new Test(), propertyName);
   expect(getPropertyMetadata(Test)).toEqual({
@@ -71,8 +82,18 @@ test('[@Indexed] decorator metadata with custom values', () => {
   });
 });
 
+test('[@getPrimaryKey] decorator', () => {
+  class Test {}
+
+  const propertyName = 'myPrimaryKey';
+  PrimaryKey()(new Test(), propertyName);
+  const primaryKeyPropName = getPrimaryKey(Test);
+  expect(primaryKeyPropName).toBe(propertyName);
+});
+
 test('[@PrimaryKey] decorator metadata with defaults', () => {
   class Test {}
+
   const propertyName = 'propertyName';
   PrimaryKey()(new Test(), propertyName);
   expect(getPropertyMetadata(Test)).toEqual({
@@ -87,6 +108,7 @@ test('[@PrimaryKey] decorator metadata with defaults', () => {
 
 test('[@PrimaryKey] decorator metadata with partially default values', () => {
   class Test {}
+
   const propertyName = 'propertyName';
   PrimaryKey({ unique: false })(new Test(), propertyName);
   expect(getPropertyMetadata(Test)).toEqual({
@@ -101,6 +123,7 @@ test('[@PrimaryKey] decorator metadata with partially default values', () => {
 
 test('[@PrimaryKey] decorator metadata with custom values', () => {
   class Test {}
+
   const propertyName = 'propertyName';
   PrimaryKey({ unique: false, autoIncrement: false })(new Test(), propertyName);
   expect(getPropertyMetadata(Test)).toEqual({
@@ -115,6 +138,7 @@ test('[@PrimaryKey] decorator metadata with custom values', () => {
 
 test('Full example of all decorators with defaults', () => {
   class Users {}
+
   Table()(Users);
   PrimaryKey()(new Users(), 'id');
   Indexed()(new Users(), 'name');
@@ -122,6 +146,7 @@ test('Full example of all decorators with defaults', () => {
   expect(getClassMetadata(Users)).toEqual({
     name: 'Users',
     timestamps: false,
+    initialData: [],
   });
   expect(getPropertyMetadata(Users)).toEqual({
     id: {
@@ -147,6 +172,7 @@ test('Full example of all decorators with defaults', () => {
 
 test('Full example of all decorators with custom values', () => {
   class Users {}
+
   Table({ name: '__Table__', timestamps: true })(Users);
   PrimaryKey({ autoIncrement: false, unique: true })(new Users(), 'id');
   Indexed({ unique: false, multiEntry: true })(new Users(), 'name');
@@ -154,6 +180,7 @@ test('Full example of all decorators with custom values', () => {
   expect(getClassMetadata(Users)).toEqual({
     name: '__Table__',
     timestamps: true,
+    initialData: [],
   });
   expect(getPropertyMetadata(Users)).toEqual({
     id: {
@@ -179,6 +206,7 @@ test('Full example of all decorators with custom values', () => {
 
 test('Several decorators overriding each other. Gets the last value', () => {
   class Users {}
+
   Table({ name: '__Table__', timestamps: true })(Users);
   Table({ name: 'Actual_Name', timestamps: false })(Users);
   PrimaryKey({ autoIncrement: false, unique: true })(new Users(), 'id');
@@ -193,6 +221,7 @@ test('Several decorators overriding each other. Gets the last value', () => {
   expect(getClassMetadata(Users)).toEqual({
     name: 'Actual_Name',
     timestamps: false,
+    initialData: [],
   });
   expect(getPropertyMetadata(Users)).toEqual({
     id: {

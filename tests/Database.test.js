@@ -2,14 +2,41 @@ import { Database, Indexed, PrimaryKey, Table } from '../src';
 
 describe('Database', function () {
   beforeAll(() => jest.clearAllMocks());
-  afterEach(async () => {
-    jest.clearAllTimers();
-  });
+  afterEach(() => jest.clearAllTimers());
+
   it('should throw config error "Config has to be an Object"', (done) => {
     expect(() => {
       new Database();
     }).toThrowError('Config.tables has to be an Array');
     done();
+  });
+
+  it('should throw when "verify" method is lacking primary key value in insert data', function () {
+    try {
+      Database.verify(
+        {
+          username: 'test',
+          password: 'test',
+        },
+        [
+          {
+            name: 'users',
+            primaryKey: {
+              name: 'id',
+              autoIncrement: false,
+              unique: true,
+            },
+            indexes: {
+              username: { unique: true, multiEntry: false },
+              password: { unique: false, multiEntry: false },
+            },
+          },
+        ],
+      );
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error);
+      expect(e.message).toBe('Either include primary key as well or set {autoincrement: true}.');
+    }
   });
 
   it('should throw config validation errors', (done) => {

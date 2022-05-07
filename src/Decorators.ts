@@ -3,6 +3,7 @@ import 'reflect-metadata';
 type TableDecoratorOptions = {
   name: string;
   timestamps: boolean;
+  initialData: Record<string, IDBValidKey | IDBKeyRange>[];
 };
 type IndexedPropertyType = Partial<{
   unique: boolean;
@@ -37,6 +38,7 @@ export const Table = (options?: Partial<{ name: string; timestamps: boolean }>) 
   const defaultOptions: TableDecoratorOptions = {
     name: target.name,
     timestamps: false,
+    initialData: [],
   };
   const assignOptions: TableDecoratorOptions = {
     ...defaultOptions,
@@ -120,4 +122,12 @@ export const Indexed = (options: IndexedPropertyType = {}) => {
   };
 
   return PropertyDecorator({ indexed });
+};
+
+export const getPrimaryKey = (target: Function) => {
+  const properties = getPropertyMetadata(target);
+  const propertyEntries = Object.entries(properties);
+  for (const [propertyName, property] of propertyEntries) {
+    if (property.primaryKey) return propertyName;
+  }
 };

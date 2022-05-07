@@ -2,9 +2,15 @@ import ArraySorter from './array-sorter';
 import { Optional } from 'utility-types';
 import { Database } from './Database';
 import { OptionsType, OptionsWhereAsObject, TableType, TimeStampsType } from './types';
+import { ClassConstructor, plainToInstance } from 'class-transformer';
+import { getPrimaryKey } from './Decorators';
 
 export default class Model<DataType extends Optional<TimeStampsType>> {
-  constructor(private readonly connection: Promise<IDBDatabase>, private readonly table: TableType) {}
+  constructor(
+    private readonly db: IDBDatabase,
+    private readonly table: TableType,
+    private readonly tableClass: Function = null,
+  ) {}
 
   /**
    * @description This method is used to insert data into the table.
@@ -20,14 +26,24 @@ export default class Model<DataType extends Optional<TimeStampsType>> {
             updatedAt: Date.now(),
           }),
         };
-        this.connection.then((db) => {
-          const request = db
-            .transaction(this.table.name, 'readwrite')
-            .objectStore(this.table.name)
-            .add(verifiedInsertData);
-          request.onsuccess = () => resolve(data);
-          request.onerror = () => reject(request.error || 'Unable to add data. Check the unique values');
-        });
+        const primary: { key: string } = { key: null };
+        try {
+          primary.key = getPrimaryKey(this.tableClass);
+        } catch (e) {
+          // No primary key found
+        }
+        const request = this.db
+          .transaction(this.table.name, 'readwrite')
+          .objectStore(this.table.name)
+          .add(verifiedInsertData);
+        request.onsuccess = () =>
+          resolve(
+            this.resolveValue({
+              ...data,
+              ...(primary.key && { [primary.key]: request.result }),
+            }) as Partial<DataType>,
+          );
+        request.onerror = () => reject(request.error || 'Unable to add data. Check the unique values');
       } catch (e) {
         return reject(e);
       }
@@ -39,13 +55,11 @@ export default class Model<DataType extends Optional<TimeStampsType>> {
    */
   public async selectByPk(pKey: IDBValidKey | IDBKeyRange): Promise<DataType | undefined> {
     return new Promise((resolve, reject) => {
-      this.connection.then((db) => {
-        const transaction = db.transaction(this.table.name, 'readonly');
-        const objectStore = transaction.objectStore(this.table.name);
-        const request = objectStore.get(pKey);
-        request.onerror = () => reject(request.error || 'Unable to retrieve data from the model');
-        request.onsuccess = () => resolve(request.result);
-      });
+      const transaction = this.db.transaction(this.table.name, 'readonly');
+      const objectStore = transaction.objectStore(this.table.name);
+      const request: IDBRequest<DataType> = objectStore.get(pKey);
+      request.onerror = () => reject(request.error || 'Unable to retrieve data from the model');
+      request.onsuccess = () => resolve(this.resolveValue(request.result) as DataType);
     });
   }
 
@@ -54,13 +68,11 @@ export default class Model<DataType extends Optional<TimeStampsType>> {
    */
   public async selectByIndex(indexName: string, value: IDBValidKey | IDBKeyRange): Promise<DataType | undefined> {
     return new Promise((resolve, reject) => {
-      this.connection.then((db) => {
-        const transaction = db.transaction(this.table.name, 'readonly');
-        const objectStore = transaction.objectStore(this.table.name);
-        const request = objectStore.index(indexName).get(value);
-        request.onerror = () => reject(request.error || `Unable to retrieve data from the model by ${indexName}`);
-        request.onsuccess = () => resolve(request.result);
-      });
+      const transaction = this.db.transaction(this.table.name, 'readonly');
+      const objectStore = transaction.objectStore(this.table.name);
+      const request: IDBRequest<DataType> = objectStore.index(indexName).get(value);
+      request.onerror = () => reject(request.error || `Unable to retrieve data from the model by ${indexName}`);
+      request.onsuccess = () => resolve(this.resolveValue(request.result) as DataType);
     });
   }
 
@@ -69,23 +81,19 @@ export default class Model<DataType extends Optional<TimeStampsType>> {
    */
   public async selectAll(): Promise<DataType[] | undefined> {
     return new Promise((resolve, reject) => {
-      this.connection.then((db) => {
-        const objectStore = db.transaction(this.table.name, 'readonly').objectStore(this.table.name);
-        const request = objectStore.getAll();
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error || "Can't get data from database");
-      });
+      const objectStore = this.db.transaction(this.table.name, 'readonly').objectStore(this.table.name);
+      const request: IDBRequest<DataType[]> = objectStore.getAll();
+      request.onsuccess = () => resolve(this.resolveValue(request.result) as DataType[]);
+      request.onerror = () => reject(request.error || "Can't get data from database");
     });
   }
 
   public async openCursor(): Promise<IDBRequest<IDBCursorWithValue> | undefined> {
     return new Promise((resolve, reject) => {
-      this.connection.then((db) => {
-        const objectStore = db.transaction(this.table.name, 'readonly').objectStore(this.table.name);
-        const request = objectStore.openCursor();
-        request.onsuccess = () => resolve(request);
-        request.onerror = () => reject(request.error || "Can't get data from database");
-      });
+      const objectStore = this.db.transaction(this.table.name, 'readonly').objectStore(this.table.name);
+      const request = objectStore.openCursor();
+      request.onsuccess = () => resolve(request);
+      request.onerror = () => reject(request.error || "Can't get data from database");
     });
   }
 
@@ -137,16 +145,27 @@ export default class Model<DataType extends Optional<TimeStampsType>> {
    */
   updateByPk(pKey: IDBValidKey | IDBKeyRange, dataToUpdate: Partial<DataType>): Promise<DataType | undefined> {
     return new Promise((resolve, reject) => {
-      this.connection.then((db) => {
-        this.selectByPk(pKey).then((fetchedData) => {
-          const transaction = db.transaction(this.table.name, 'readwrite');
-          const store = transaction.objectStore(this.table.name);
-          const data = Object.assign(fetchedData, dataToUpdate);
-          if (this.table.timestamps) data.createdAt = Date.now();
-          const save = store.put(data);
-          save.onsuccess = () => resolve(data);
-          save.onerror = () => reject(save.error || "Couldn't update data");
-        });
+      this.selectByPk(pKey).then((fetchedData) => {
+        const transaction = this.db.transaction(this.table.name, 'readwrite');
+        const store = transaction.objectStore(this.table.name);
+        const data = Object.assign(fetchedData, dataToUpdate);
+        const primary: { key: string } = { key: null };
+        try {
+          primary.key = getPrimaryKey(this.tableClass);
+        } catch (e) {
+          // No primary key found
+        }
+        if (this.table.timestamps) data.createdAt = Date.now();
+        const save = store.put(data);
+        save.onsuccess = () => {
+          resolve(
+            this.resolveValue({
+              ...data,
+              ...(primary.key && { [primary.key]: save.result }),
+            }) as DataType,
+          );
+        };
+        save.onerror = () => reject(save.error || "Couldn't update data");
       });
     });
   }
@@ -156,12 +175,21 @@ export default class Model<DataType extends Optional<TimeStampsType>> {
    */
   deleteByPk(pKey: IDBValidKey | IDBKeyRange): Promise<IDBValidKey | IDBKeyRange | undefined> {
     return new Promise((resolve, reject) => {
-      this.connection.then((db) => {
-        const transaction = db.transaction(this.table.name, 'readwrite');
-        const request = transaction.objectStore(this.table.name).delete(pKey);
-        request.onsuccess = () => resolve(pKey);
-        request.onerror = () => reject(request.error || "Couldn't remove an item");
-      });
+      const transaction = this.db.transaction(this.table.name, 'readwrite');
+      const request = transaction.objectStore(this.table.name).delete(pKey);
+      request.onsuccess = () => resolve(pKey);
+      request.onerror = () => reject(request.error || "Couldn't remove an item");
     });
+  }
+
+  private resolveValue(value: Partial<DataType> | Partial<DataType>[]): Partial<DataType> | Partial<DataType>[] {
+    if (this.tableClass) {
+      if (Array.isArray(value)) {
+        return value.map((item) => plainToInstance(<ClassConstructor<DataType>>this.tableClass, item));
+      }
+      return plainToInstance(<ClassConstructor<DataType>>this.tableClass, value);
+    }
+
+    return value;
   }
 }
