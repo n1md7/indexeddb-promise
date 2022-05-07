@@ -36,7 +36,6 @@ jobs:
       - name: Init new repo in docs folder and commit generated files to it
         run: |
           cd public
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global init.defaultBranch master
           git init
           git add -A
@@ -46,6 +45,7 @@ jobs:
       - name: Force push to destination branch
         uses: ad-m/github-push-action@v0.5.0
         with:
+          run: git config --global --add safe.directory /github/workspace/public
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           force: true
