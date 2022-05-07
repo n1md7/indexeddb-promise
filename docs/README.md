@@ -12,8 +12,8 @@ Has TypeScript support with TS-class decorators.
 
 ## Demo
 
-- [Basic Example01](https://n1md7.github.io/indexeddb-promise/examples/Example01.html)
-- [Advanced Example02](https://n1md7.github.io/indexeddb-promise/examples/Example02.html)
+- [Basic Example01](https://n1md7.github.io/indexeddb-promise/Example01.html)
+- [Advanced Example02](https://n1md7.github.io/indexeddb-promise/Example02.html)
 
 ## Installation
 
