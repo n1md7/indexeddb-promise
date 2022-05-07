@@ -36,6 +36,7 @@ jobs:
       - name: Init new repo in docs folder and commit generated files to it
         run: |
           cd public
+          git config --global init.defaultBranch master
           git init
           git add -A
           git config --local user.email "action@github.com"
