@@ -10,7 +10,7 @@
     "format": "npx prettier --write --ignore-unknown './(src|tests)/**/*.(j|t)s'",
     "test": "npx jest --coverage --ci",
     "prepare": "husky install",
-    "serve": "npx http-server -o /examples ."
+    "serve": "npx http-server -o /docs ."
   },
   "author": "Harry Kodua",
   "license": "MIT",

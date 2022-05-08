@@ -25,6 +25,70 @@ $ npm install @n1md7/indexeddb-promise
 $ yarn add @n1md7/indexeddb-promise
 ```
 
+## Decorators
+
+Typescript decorators are supported.
+
+Prerequisite:
+
+```json
+{
+  "experimentalDecorators": true
+}
+```
+
+### @Table
+
+Class decorator for IndexedDB table. It defines the structure of the table.
+
+Params: options - object with following properties:
+
+- name? - string, name of the table, default is the class name
+- timestamps? - boolean, if true, createdAt and updatedAt columns will be added, default is false
+- initialData? - array of objects to be inserted into the table on database creation, default is empty
+
+```javascript
+@Table({ name: 'Users', timestamps: true })
+class User {}
+```
+
+### @Indexed
+
+Property decorator for IndexedDB index. It defines whether the property is indexed.
+
+Params: options - object with following properties:
+
+- unique? - boolean, if true, the index will be unique, default is false
+- multiEntry? - boolean, if true, the index will be multi-entry, default is true
+
+```javascript
+@Table()
+class User {
+  @Indexed({ unique: true, multiEntry: false })
+  username: string;
+}
+```
+
+### @PrimaryKey
+
+Property decorator for IndexedDB primary key. It defines whether the property is primary key.
+
+Params: options - object with following properties:
+
+- autoIncrement? - boolean, if true, the primary key will be auto-incremented, default is true
+- unique? - boolean, if true, the primary key will be unique, default is true
+
+```javascript
+@Table()
+class User {
+  @PrimaryKey()
+  id: number;
+
+  @Index()
+  name: string;
+}
+```
+
 ## Methods
 
 | Method          | Description                                | Params                  |
@@ -86,7 +150,7 @@ Object properties:
 }
 ```
 
-#### Javascript/Typescript example
+#### JS/TS example
 
 ```javascript
 const options = {
@@ -130,7 +194,7 @@ Return type: Promise<Object|{}>
 
 Accept params: indexName: string, valueToMatch: string
 
-#### Javascript/Typescript example
+#### JS/TS example
 
 ```javascript
 model.selectByIndex('username', 'admin').then((data) => data);
@@ -147,7 +211,7 @@ Return type: Promise<Object|{}>
 
 Accept params: primaryKey: string \ number
 
-#### Javascript/Typescript example
+#### JS/TS example
 
 ```javascript
 model.selectByPk(1).then((data) => data);
@@ -164,7 +228,7 @@ Return type: Promise<Object|{}>
 
 Accept params: primaryKey: string \ number, Object
 
-#### Javascript/Typescript example
+#### JS/TS example
 
 ```javascript
 model.updateByPk(123, { username: 'admin' });
@@ -181,7 +245,7 @@ Return type: Promise<String|Number>
 
 Accept params: primaryKey: string \ number
 
-#### Javascript/Typescript example
+#### JS/TS example
 
 ```javascript
 model.deleteByPk(123);
@@ -243,7 +307,7 @@ Basic usage of `Model`
           },
         ],
       });
-
+      await db.connect();
       // Add a new record
       const model = db.useModel('MyNewTable');
       model
@@ -254,15 +318,15 @@ Basic usage of `Model`
           createdAt: new Date(),
           updatedAt: new Date(),
         })
-        .then(function () {
+        .then(function() {
           console.info('Yay, you have saved the data.');
         })
-        .catch(function (error) {
+        .catch(function(error) {
           console.error(error);
         });
 
       // Get all results from the database
-      model.selectAll().then(function (results) {
+      model.selectAll().then(function(results) {
         console.log(...results);
       });
     </script>
@@ -281,7 +345,7 @@ import { Database } from '@n1md7/indexeddb-promise';
 
 ### TypeScript 01
 
-```typescript
+```javascript
 import { Database } from '@n1md7/indexeddb-promise';
 
 interface Users {
@@ -360,7 +424,7 @@ const database = new Database({
 
 ### TypeScript decorators 02
 
-```typescript
+```javascript
 import { Table, PrimaryKey, Indexed, Database } from '@n1md7/indexeddb-promise';
 
 @Table({ name: '__Name__', timestamps: true })
@@ -382,7 +446,7 @@ const anotherDb = new Database({
   name: 'Other-DB',
   tables: [SomeTable],
 });
-
+await anotherDb.connect();
 const model = anotherDb.useModel(SomeTable);
 
 (async () => {
@@ -407,7 +471,7 @@ const model = anotherDb.useModel(SomeTable);
 
 ### TypeScript decorators 02
 
-```typescript
+```javascript
 import { Database, Indexed, PrimaryKey, Table } from '@n1md7/indexeddb-promise';
 
 @Table({ timestamps: true })
@@ -435,8 +499,8 @@ class Info {
   userId: number;
 
   name: {
-    first: string;
-    last: string;
+    first: string,
+    last: string,
   };
 
   age: number;
