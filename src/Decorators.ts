@@ -32,9 +32,9 @@ const TABLE_CLASS_OPTIONS = Symbol('TABLE_CLASS_OPTIONS');
 /**
  * Decorator for a class that represents a table in the database.
  *
- * Default {name}: class name.
- * Default {timestamps}: false.
- * Default {initialData}: empty.
+ * - Default value for {name}: class name.
+ * - Default value for {timestamps}: `false`.
+ * - Default value for {initialData}: `[]`.
  *
  */
 export const Table = (options?: Partial<TableDecoratorOptions>) => (target: Function) => {
@@ -95,8 +95,8 @@ export function getClassMetadata(target: Function): TableDecoratorOptions {
 /**
  * Decorator for a property that is a primary key.
  *
- * Default {autoIncrement}: true.
- * Default {unique}: true.
+ * - Default value for {autoIncrement}: true.
+ * - Default value for {unique}: true.
  */
 export const PrimaryKey = (options: Omit<PrimaryKeyType, 'name'> = {}) => {
   const defaults = {
@@ -113,8 +113,8 @@ export const PrimaryKey = (options: Omit<PrimaryKeyType, 'name'> = {}) => {
  * Decorator for a property that is indexed.
  * When indexed is not set for the field .selectByIndex is not possible to use.
  *
- * Default {unique}: false.
- * Default {multiEntry}: true.
+ * - Default value for  {unique}: false.
+ * - Default value for {multiEntry}: true.
  */
 export const Indexed = (options: IndexedPropertyType = {}) => {
   const defaults = {
