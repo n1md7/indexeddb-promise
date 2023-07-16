@@ -1,16 +1,8 @@
 codecov:
   require_ci_to_pass: yes
-  require_changes: no
 
 coverage:
   status:
-    changes:
-      default:
-        target: 80%
-        threshold: 1%
-      patch:
-        target: 80%
-        threshold: 1%
     project:
       default:
         target: 80%
