@@ -65,6 +65,7 @@ export default class Model<DataType extends Optional<TimeStampsType>> {
 
   /**
    * @description This method is used to select data from the table by defined Index key.
+   * Returns first match when multiple record with the same key.
    */
   public async selectByIndex(indexName: string, value: IDBValidKey | IDBKeyRange): Promise<DataType | undefined> {
     return new Promise((resolve, reject) => {
@@ -73,6 +74,19 @@ export default class Model<DataType extends Optional<TimeStampsType>> {
       const request: IDBRequest<DataType> = objectStore.index(indexName).get(value);
       request.onerror = () => reject(request.error || `Unable to retrieve data from the model by ${indexName}`);
       request.onsuccess = () => resolve(this.resolveValue(request.result) as DataType);
+    });
+  }
+
+  /**
+   * @description This method is used to select data from the table by defined Index key.
+   */
+  public async selectByIndexAll(indexName: string, value: IDBValidKey | IDBKeyRange): Promise<DataType[]> {
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(this.table.name, 'readonly');
+      const objectStore = transaction.objectStore(this.table.name);
+      const request: IDBRequest<DataType[]> = objectStore.index(indexName).getAll(value);
+      request.onerror = () => reject(request.error || `Unable to retrieve data from the model by ${indexName}`);
+      request.onsuccess = () => resolve(this.resolveValue(request.result) as DataType[]);
     });
   }
 

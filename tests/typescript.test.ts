@@ -77,6 +77,9 @@ describe('Typescript', function () {
     });
 
     const user = await userModel.selectByIndex('username', 'admin');
+    const users = await userModel.selectByIndexAll('username', 'admin');
+    expect(users).toHaveLength(1);
+    expect(user).toEqual(users[0]);
     expect(user).toBeInstanceOf(User);
     expect(user).toEqual({
       id: expect.any(Number),

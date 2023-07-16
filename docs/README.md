@@ -91,16 +91,17 @@ class User {
 
 ## Methods
 
-| Method          | Description                                | Params                  |
-| --------------- | ------------------------------------------ | ----------------------- |
-| `selectAll`     | Get the data from database                 | None                    |
-| `select`        | Fetch data from database with filters      | Object                  |
-| `insert`        | Add data into database                     | Object                  |
-| `openCursor`    | Get database cursor to iterate on demand   | None                    |
-| `selectByIndex` | Select database data by indexed properties | String, String          |
-| `selectByPk`    | Select database record by primary key      | String \ Number         |
-| `updateByPk`    | Update database record by primary key      | Number \ Number, Object |
-| `deleteByPk`    | Delete database record by primary key      | String \ Number         |
+| Method             | Description                                       | Params                  |
+| ------------------ | ------------------------------------------------- | ----------------------- |
+| `selectAll`        | Get the data from database                        | None                    |
+| `select`           | Fetch data from database with filters             | Object                  |
+| `insert`           | Add data into database                            | Object                  |
+| `openCursor`       | Get database cursor to iterate on demand          | None                    |
+| `selectByIndex`    | Select database data by indexed properties (one)  | String, String          |
+| `selectByIndexAll` | Select database data by indexed properties (many) | String, String          |
+| `selectByPk`       | Select database record by primary key             | String \ Number         |
+| `updateByPk`       | Update database record by primary key             | Number \ Number, Object |
+| `deleteByPk`       | Delete database record by primary key             | String \ Number         |
 
 ### - selectAll
 
@@ -199,6 +200,23 @@ Accept params: indexName: string, valueToMatch: string
 ```javascript
 model.selectByIndex('username', 'admin').then((data) => data);
 const data = await model.selectByIndex('username', 'admin');
+```
+
+### - selectByIndexAll
+
+#### Params
+
+Gets the data from database with the specified indexed property.
+
+Return type: Promise<Array<Object|{}>>
+
+Accept params: indexName: string, valueToMatch: string
+
+#### JS/TS example
+
+```javascript
+model.selectByIndexAll('username', 'admin').then((data) => data);
+const data = await model.selectByIndexAll('username', 'admin');
 ```
 
 ### - selectByPk
