@@ -5,3 +5,4 @@ reports
 lib
 build
 dist
+examples/indexed-db.min.js

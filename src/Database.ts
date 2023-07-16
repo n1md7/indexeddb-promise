@@ -92,8 +92,10 @@ export class Database {
       };
 
       request.onblocked = () => {
-        request.result.close();
-        console.error(`[${this.databaseName}]: ${request.error || 'Database blocked'}`);
+        this.__connection.close();
+        reject(
+          `[${this.databaseName}]: Couldn't open database, database is blocked. Close all connections and try again.`,
+        );
       };
 
       request.onupgradeneeded = (event) =>
@@ -133,7 +135,7 @@ export class Database {
     return new Promise((resolve, reject) => {
       const request = window.indexedDB.deleteDatabase(name);
       request.onblocked = () => {
-        console.log(`[${name}]: Couldn't delete database due to the operation being blocked`);
+        reject(`[${name}]: Couldn't remove database, database is blocked. Close all connections and try again.`);
       };
       request.onsuccess = () => resolve('Database has been removed');
       request.onerror = () => reject(request.error || "Couldn't remove database");
@@ -141,7 +143,7 @@ export class Database {
   }
 
   private static async onUpgradeNeeded(db: IDBDatabase, database: ConfigType, oldVersion: number) {
-    for await (const table of database.tables) {
+    for (const table of database.tables) {
       if ((oldVersion < database.version && oldVersion) || db.objectStoreNames.contains(table.name)) {
         db.deleteObjectStore(table.name);
         console.info(`[${database.name}]: DB version changed, removing table: ${table.name} for the fresh start`);

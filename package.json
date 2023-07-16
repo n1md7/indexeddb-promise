@@ -6,7 +6,9 @@
   "scripts": {
     "compile": "tsc",
     "minify": "npx browserify ./lib/index.js -o ./dist/indexed-db.min.js --standalone=IndexedDB -t [ babelify --presets [ @babel/preset-env ] ]",
-    "build": "npm run compile && npm run minify",
+    "copy:minified:to:examples": "cp -f ./dist/indexed-db.min.js ./examples/indexed-db.min.js",
+    "serve:examples": "npx http-server -o /examples .",
+    "build": "npm run compile && npm run minify && npm run copy:minified:to:examples",
     "format": "npx prettier --write --ignore-unknown './(src|tests)/**/*.(j|t)s'",
     "test": "npx jest --coverage --ci",
     "prepare": "husky install",
