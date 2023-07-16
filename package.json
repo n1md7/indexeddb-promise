@@ -1,6 +1,6 @@
 {
   "name": "@n1md7/indexeddb-promise",
-  "version": "7.0.4",
+  "version": "7.0.5",
   "description": "Indexed DB wrapper with promises",
   "main": "./lib/index.js",
   "scripts": {
