@@ -12,10 +12,7 @@ export class Database {
   protected readonly tables: string[] = ['DefaultTable'];
   protected readonly databaseVersion: number = 1;
 
-  static indexedDB: IDBFactory;
-
   constructor(protected readonly config: ConfigType | ConfigType<Function>) {
-    Database.indexedDB = Database.getIndexedDB();
     if (Array.isArray(config)) {
       throw new IDBError(IDBError.compose('Config has to be an Object'));
     }
@@ -77,11 +74,11 @@ export class Database {
 
   public connect(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      if (!Database.indexedDB) {
+      if (!window || !('indexedDB' in window) || !('open' in window.indexedDB)) {
         return reject('Unsupported environment');
       }
 
-      const request = Database.indexedDB.open(this.databaseName, this.databaseVersion);
+      const request = window.indexedDB.open(this.databaseName, this.databaseVersion);
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         this.__connection = request.result;
@@ -136,7 +133,7 @@ export class Database {
 
   public static async removeDatabase(name: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      const request = Database.indexedDB.deleteDatabase(name);
+      const request = window.indexedDB.deleteDatabase(name);
       request.onblocked = () => {
         reject(`[${name}]: Couldn't remove database, database is blocked. Close all connections and try again.`);
       };
@@ -205,12 +202,5 @@ export class Database {
     }
 
     return new Model(this.connection, table, target);
-  }
-
-  private static getIndexedDB() {
-    if (typeof indexedDB !== 'undefined') return indexedDB;
-    if (typeof window !== 'undefined' && typeof window.indexedDB !== 'undefined') return window.indexedDB;
-
-    return null;
   }
 }
